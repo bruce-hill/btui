@@ -18,15 +18,21 @@
 #include <time.h>
 #include <unistd.h>
 
-int btui_enable(FILE *term);
-int btui_disable(FILE *term);
-int btui_getkey(FILE *in, int *mouse_x, int *mouse_y);
+typedef struct {
+    FILE *in, *out;
+    int width, height;
+    int size_changed;
+} btui_t;
+
+static btui_t current_bt;
+
+btui_t* btui_enable(void);
+void btui_disable(btui_t *bt);
+int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y);
+int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
-int move_cursor(FILE *term, int x, int y);
-
-struct winsize winsize = {0};
-int winsize_changed = 0;
+int btui_set_attributes(btui_t *bt, unsigned long attrs);
 
 // Terminal escape sequences:
 #define T_WRAP        "7"
@@ -38,8 +44,8 @@ int winsize_changed = 0;
 #define T_ON(opt)  "\033[?" opt "h"
 #define T_OFF(opt) "\033[?" opt "l"
 
-const char *TUI_ENTER = T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
-const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
+static const char *TUI_ENTER = T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
+static const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
 
 // Maximum time in milliseconds between double clicks
 #ifndef DOUBLECLICK_THRESHOLD
@@ -157,11 +163,11 @@ static inline int nextnum(int fd, int c, int *n)
  * If mouse_x or mouse_y are non-null and a mouse event occurs, they will be
  * set to the position of the mouse (0-indexed).
  */
-int btui_getkey(FILE *in, int *mouse_x, int *mouse_y)
+int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y)
 {
     if (mouse_x) *mouse_x = -1;
     if (mouse_y) *mouse_y = -1;
-    int fd = fileno(in);
+    int fd = fileno(bt->in);
     int numcode = 0, modifiers = 0;
     int c = nextchar(fd);
     if (c == '\x1b')
@@ -348,7 +354,7 @@ int btui_keynamed(const char *name)
 }
 
 
-static const struct termios default_termios = {
+static const struct termios normal_termios = {
     .c_iflag = ICRNL,
     .c_oflag = OPOST | ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
     .c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOE | ECHOK | ECHOCTL | ECHOKE,
@@ -390,14 +396,12 @@ const struct termios tui_termios = {
     .c_cc[VTIME] = 0,
 };
 
-static FILE *terminal;
-
 static void cleanup(void)
 {
-    if (!terminal) return;
-    tcsetattr(fileno(terminal), TCSANOW, &default_termios);
-    fputs(TUI_LEAVE, terminal);
-    fflush(terminal);
+    if (!current_bt.out) return;
+    tcsetattr(fileno(current_bt.out), TCSANOW, &normal_termios);
+    fputs(TUI_LEAVE, current_bt.out);
+    fflush(current_bt.out);
 }
 
 static void cleanup_and_raise(int sig)
@@ -405,7 +409,7 @@ static void cleanup_and_raise(int sig)
     cleanup();
     raise(sig);
     // This code will only ever be run if sig is SIGTSTP/SIGSTOP, otherwise, raise() won't return:
-    btui_enable(terminal);
+    btui_enable();
     struct sigaction sa = {.sa_handler = &cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
     sigaction(sig, &sa, NULL);
 }
@@ -413,18 +417,34 @@ static void cleanup_and_raise(int sig)
 static void update_term_size(int sig)
 {
     (void)sig;
-    struct winsize oldsize = winsize;
+//struct winsize winsize = {0};
+//int winsize_changed = 0;
+    struct winsize winsize;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &winsize);
-    winsize_changed |= (oldsize.ws_col != winsize.ws_col || oldsize.ws_row != winsize.ws_row);
+    if (winsize.ws_col != current_bt.width || winsize.ws_row != current_bt.height) {
+        current_bt.width = winsize.ws_col;
+        current_bt.height = winsize.ws_row;
+        current_bt.size_changed = 1;
+    }
 }
 
-int btui_enable(FILE *term)
+btui_t *btui_enable(void)
 {
-    if (tcsetattr(fileno(term), TCSANOW, &tui_termios) == -1)
-        return -1;
+    char *tty_name = ttyname(STDIN_FILENO);
+    FILE *in = fopen(tty_name, "r");
+    if (!in) return NULL;
+    FILE *out = fopen(tty_name, "w");
+    if (!out) return NULL;
 
+    if (tcsetattr(fileno(out), TCSANOW, &tui_termios) == -1) {
+        fclose(in);
+        fclose(out);
+        return NULL;
+    }
+
+    current_bt.in = in;
+    current_bt.out = out;
     atexit(cleanup);
-    terminal = term;
 
     struct sigaction sa_winch = {.sa_handler = &update_term_size};
     sigaction(SIGWINCH, &sa_winch, NULL);
@@ -433,24 +453,104 @@ int btui_enable(FILE *term)
     for (size_t i = 0; i < sizeof(signals)/sizeof(signals[0]); i++)
         sigaction(signals[i], &sa, NULL);
 
-    update_term_size(0);
-    winsize_changed = 0;
+    update_term_size(SIGWINCH);
+    current_bt.size_changed = 0;
 
-    fputs(TUI_ENTER, term);
-    fflush(term);
-    return 0;
+    fputs(TUI_ENTER, out);
+    fflush(out);
+    return &current_bt;
 }
 
-int btui_disable(FILE *term)
+void btui_disable(btui_t *bt)
 {
-    terminal = term;
+    (void)bt;
     cleanup();
-    return 0;
 }
 
-int move_cursor(FILE *term, int x, int y)
+int btui_move_cursor(btui_t *bt, int x, int y)
 {
-    return fprintf(term, "\033[%d;%dH", y+1, x+1);
+    return fprintf(bt->out, "\033[%d;%dH", y+1, x+1);
+}
+
+int set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+{
+    return fprintf(bt->out, "\033[38;2;%d;%d;%dm", r, g, b);
+}
+
+int set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+{
+    return fprintf(bt->out, "\033[48;2;%d;%d;%dm", r, g, b);
+}
+
+int set_fg_hex(btui_t *bt, int hex)
+{
+    return fprintf(bt->out, "\033[38;2;%d;%d;%dm",
+                   (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+}
+
+int set_bg_hex(btui_t *bt, int hex)
+{
+    return fprintf(bt->out, "\033[48;2;%d;%d;%dm",
+                   (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+}
+
+const unsigned long BTUI_NORMAL               = 1ul << 0;
+const unsigned long BTUI_BOLD                 = 1ul << 1;
+const unsigned long BTUI_FAINT                = 1ul << 2;
+const unsigned long BTUI_ITALIC               = 1ul << 3;
+const unsigned long BTUI_UNDERLINE            = 1ul << 4;
+const unsigned long BTUI_BLINK_SLOW           = 1ul << 5;
+const unsigned long BTUI_BLINK_FAST           = 1ul << 6;
+const unsigned long BTUI_REVERSE              = 1ul << 7;
+const unsigned long BTUI_CONCEAL              = 1ul << 8;
+const unsigned long BTUI_STRIKETHROUGH        = 1ul << 9;
+const unsigned long BTUI_FRAKTUR              = 1ul << 20;
+const unsigned long BTUI_DOUBLE_UNDERLINE     = 1ul << 21;
+const unsigned long BTUI_NO_BOLD_OR_FAINT     = 1ul << 22;
+const unsigned long BTUI_NO_ITALIC_OR_FRAKTUR = 1ul << 23;
+const unsigned long BTUI_NO_UNDERLINE         = 1ul << 24;
+const unsigned long BTUI_NO_BLINK             = 1ul << 25;
+const unsigned long BTUI_NO_REVERSE           = 1ul << 27;
+const unsigned long BTUI_NO_CONCEAL           = 1ul << 28;
+const unsigned long BTUI_NO_STRIKETHROUGH     = 1ul << 29;
+const unsigned long BTUI_FG_BLACK             = 1ul << 30;
+const unsigned long BTUI_FG_RED               = 1ul << 31;
+const unsigned long BTUI_FG_GREEN             = 1ul << 32;
+const unsigned long BTUI_FG_YELLOW            = 1ul << 33;
+const unsigned long BTUI_FG_BLUE              = 1ul << 34;
+const unsigned long BTUI_FG_MAGENTA           = 1ul << 35;
+const unsigned long BTUI_FG_CYAN              = 1ul << 36;
+const unsigned long BTUI_FG_WHITE             = 1ul << 37;
+// 38: 256/24bit color
+const unsigned long BTUI_NO_FG                = 1ul << 39;
+const unsigned long BTUI_BG_BLACK             = 1ul << 40;
+const unsigned long BTUI_BG_RED               = 1ul << 41;
+const unsigned long BTUI_BG_GREEN             = 1ul << 42;
+const unsigned long BTUI_BG_YELLOW            = 1ul << 43;
+const unsigned long BTUI_BG_BLUE              = 1ul << 44;
+const unsigned long BTUI_BG_MAGENTA           = 1ul << 45;
+const unsigned long BTUI_BG_CYAN              = 1ul << 46;
+const unsigned long BTUI_BG_WHITE             = 1ul << 47;
+// 48: 256/24bit color
+const unsigned long BTUI_NO_BG                = 1ul << 49;
+const unsigned long BTUI_FRAMED               = 1ul << 51;
+const unsigned long BTUI_ENCIRCLED            = 1ul << 52;
+const unsigned long BTUI_OVERLINED            = 1ul << 53;
+
+int btui_set_attributes(btui_t *bt, unsigned long attrs)
+{
+    int printed = fputs("\033[", bt->out);
+    for (int i = 0; i < 64; i++) {
+        if (attrs & (1ul << i)) {
+            attrs ^= (1ul << i);
+            if (attrs)
+                printed += fprintf(bt->out, "%d;", i);
+            else
+                printed += fprintf(bt->out, "%d", i);
+        }
+    }
+    printed += fputs("m", bt->out);
+    return printed;
 }
 
 #endif

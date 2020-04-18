@@ -3,31 +3,32 @@
 
 int main(void)
 {
-    FILE *tty_in = fopen("/dev/tty", "r");
-    FILE *tty_out = fopen("/dev/tty", "w");
-    btui_enable(tty_out);
+    btui_t *bt = btui_enable();
+    if (!bt) return 1;
     int done = 0;
     int x = 0, y = 0;
     int i = 0;
     while (!done) {
-        move_cursor(tty_out, 0, winsize.ws_row-1);
-        fprintf(tty_out, "Update %d, size = %dx%d", i++, winsize.ws_col, winsize.ws_row);
-        fflush(tty_out);
+        btui_move_cursor(bt, 0, bt->height-1);
+        fprintf(bt->out, "Update %d, size = %dx%d", i++, bt->width, bt->height);
+        fflush(bt->out);
 
-        int key = btui_getkey(tty_in, NULL, NULL);
+        int key = btui_getkey(bt, NULL, NULL);
         switch (key) {
             case 'q': case KEY_CTRL_C: done = 1; break;
             case -1: break;
             default: {
                 char buf[256] = {0};
                 btui_keyname(key, buf);
-                move_cursor(tty_out, x, y++);
-                fprintf(tty_out, "Pressed: %s", buf);
-                fflush(tty_out);
+                btui_move_cursor(bt, x, y++);
+                btui_set_attributes(bt, BTUI_FG_YELLOW | BTUI_BOLD);
+                fprintf(bt->out, "Pressed: %s", buf);
+                btui_set_attributes(bt, BTUI_NORMAL);
+                fflush(bt->out);
                 break;
             }
         }
     }
-    btui_disable(tty_out);
+    btui_disable(bt);
     return 0;
 }
