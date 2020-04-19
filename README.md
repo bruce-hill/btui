@@ -86,30 +86,25 @@ BTUI comes with bindings for C, Python, and Lua.
 BTUI has the following C function definitions, as well as definitions for some
 constants, including terminal escape values and keycodes.
 
-    btui_t* btui_enable(void);
+    int btui_clear(btui_t *bt, int mode);
     void btui_disable(btui_t *bt);
+    void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+    void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+    btui_t* btui_enable(void);
+    void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+    #define btui_flush(bt) fflush((bt)->out)
     int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
-    int btui_move_cursor(btui_t *bt, int x, int y);
     char *btui_keyname(int key, char *buf);
     int btui_keynamed(const char *name);
-    int btui_set_attributes(btui_t *bt, attr_t attrs);
-    int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int btui_set_fg_hex(btui_t *bt, int hex);
-    int btui_set_bg_hex(btui_t *bt, int hex);
+    int btui_move_cursor(btui_t *bt, int x, int y);
     #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
     #define btui_puts(bt, s) fputs(s, (bt)->out)
-    #define btui_flush(bt) fflush((bt)->out)
-    #define btui_clear_below(bt) fputs("\033[J", (bt)->out)
-    #define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
-    #define btui_clear_screen(bt) fputs("\033[2J", (bt)->out)
-    #define btui_clear_right(bt) fputs("\033[K", (bt)->out)
-    #define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
-    #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
+    int btui_set_attributes(btui_t *bt, attr_t attrs);
+    int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+    int btui_set_bg_hex(btui_t *bt, int hex);
+    int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+    int btui_set_fg_hex(btui_t *bt, int hex);
     #define btui_suspend(bt) kill(getpid(), SIGTSTP)
-    void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-    void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-    void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
 
 See [C/test.c](C/test.c) and [C/rainbow.c](C/rainbow.c) for example usage. You
 can run `make testc` to run the C test demo and `make rainbow` to run the

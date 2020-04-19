@@ -101,17 +101,17 @@ static int Lbtui_clear(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     const char *cleartype = luaL_optlstring(L, 2, "screen", NULL);
     if (strcmp(cleartype, "screen") == 0) {
-        btui_clear_screen(*bt);
+        btui_clear(*bt, BTUI_CLEAR_SCREEN);
     } else if (strcmp(cleartype, "below") == 0) {
-        btui_clear_below(*bt);
+        btui_clear(*bt, BTUI_CLEAR_BELOW);
     } else if (strcmp(cleartype, "above") == 0) {
-        btui_clear_above(*bt);
+        btui_clear(*bt, BTUI_CLEAR_ABOVE);
     } else if (strcmp(cleartype, "right") == 0) {
-        btui_clear_right(*bt);
+        btui_clear(*bt, BTUI_CLEAR_RIGHT);
     } else if (strcmp(cleartype, "left") == 0) {
-        btui_clear_left(*bt);
+        btui_clear(*bt, BTUI_CLEAR_LEFT);
     } else if (strcmp(cleartype, "line") == 0) {
-        btui_clear_line(*bt);
+        btui_clear(*bt, BTUI_CLEAR_LINE);
     } else {
         luaL_argerror(L, 2, "unknown clear type");
     }
@@ -123,7 +123,6 @@ static int Lbtui_flush(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    btui_clear_screen(*bt);
     btui_flush(*bt);
     return 0;
 }
@@ -285,7 +284,7 @@ static int Lbtui_suspend(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    btui_suspend(bt);
+    btui_suspend(*bt);
     return 0;
 }
 

@@ -159,19 +159,11 @@ class BTUI:
         libbtui.btui_suspend(self._btui)
 
     def clear(self, mode='screen'):
-        if mode == 'below':
-            self.write_bytes(b'\033[J')
-        elif mode == 'above':
-            self.write_bytes(b'\033[1J')
-        elif mode == 'screen':
-            self.write_bytes(b'\033[2J')
-        elif mode == 'right':
-            self.write_bytes(b'\033[K')
-        elif mode == 'left':
-            self.write_bytes(b'\033[1K')
-        elif mode == 'line':
-            self.write_bytes(b'\033[2K')
-        libbtui.btui_flush(self._btui)
+        assert self._btui
+        if mode not in ('screen', 'above', 'below', 'line', 'left', 'right'):
+            raise ArgumentError("Not a supported clear type: "+repr(mode))
+        clr = ctypes.c_uint.in_dll(libbtui, 'BTUI_CLEAR_' + mode.upper())
+        libbtui.btui_clear(self._btui, clr)
 
     def set_attributes(self, *attrs):
         assert self._btui

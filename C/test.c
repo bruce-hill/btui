@@ -33,7 +33,7 @@ int main(void)
 
         int mouse_x = -1, mouse_y = -1;
         int key = btui_getkey(bt, -1, &mouse_x, &mouse_y);
-        btui_clear_screen(bt);
+        btui_clear(bt, BTUI_CLEAR_SCREEN);
         switch (key) {
             case 'q': case KEY_CTRL_C: done = 1; break;
             case KEY_CTRL_Z:

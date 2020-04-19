@@ -28,30 +28,25 @@ typedef struct {
 
 typedef unsigned long long attr_t;
 
-btui_t* btui_enable(void);
+int btui_clear(btui_t *bt, int mode);
 void btui_disable(btui_t *bt);
+void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+btui_t* btui_enable(void);
+void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+int btui_flush(btui_t *bt);
 int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
-int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
-int btui_set_attributes(btui_t *bt, attr_t attrs);
-int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-int btui_set_fg_hex(btui_t *bt, int hex);
-int btui_set_bg_hex(btui_t *bt, int hex);
-void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
-int btui_puts(btui_t *bt, const char *s);
-int btui_flush(btui_t *bt);
-int btui_suspend(btui_t *bt);
-#define btui_clear_below(bt) fputs("\033[J", (bt)->out)
-#define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
-#define btui_clear_screen(bt) fputs("\033[2J", (bt)->out)
-#define btui_clear_right(bt) fputs("\033[K", (bt)->out)
-#define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
-#define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
+int btui_move_cursor(btui_t *bt, int x, int y);
 #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
+int btui_puts(btui_t *bt, const char *s);
+int btui_set_attributes(btui_t *bt, attr_t attrs);
+int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_bg_hex(btui_t *bt, int hex);
+int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_fg_hex(btui_t *bt, int hex);
+int btui_suspend(btui_t *bt);
 
 static btui_t current_bt;
 
@@ -102,7 +97,21 @@ typedef enum {
     MOUSE_LEFT_RELEASE, MOUSE_RIGHT_RELEASE, MOUSE_MIDDLE_RELEASE,
     MOUSE_LEFT_DOUBLE, MOUSE_RIGHT_DOUBLE, MOUSE_MIDDLE_DOUBLE,
     MOUSE_WHEEL_RELEASE, MOUSE_WHEEL_PRESS,
-} bkey_t;
+} btui_key_t;
+
+#define _BTUI_CLEAR_SCREEN 0
+#define _BTUI_CLEAR_ABOVE  1
+#define _BTUI_CLEAR_BELOW  2
+#define _BTUI_CLEAR_LINE   3
+#define _BTUI_CLEAR_LEFT   4
+#define _BTUI_CLEAR_RIGHT  5
+
+const int BTUI_CLEAR_SCREEN = _BTUI_CLEAR_SCREEN;
+const int BTUI_CLEAR_ABOVE  = _BTUI_CLEAR_ABOVE;
+const int BTUI_CLEAR_BELOW  = _BTUI_CLEAR_BELOW;
+const int BTUI_CLEAR_LINE   = _BTUI_CLEAR_LINE;
+const int BTUI_CLEAR_LEFT   = _BTUI_CLEAR_LEFT;
+const int BTUI_CLEAR_RIGHT  = _BTUI_CLEAR_RIGHT;
 
 // Overlapping key codes:
 #define KEY_CTRL_BACKTICK  0x00 /* clash with ^@ */
@@ -661,6 +670,19 @@ int btui_suspend(btui_t *bt)
 {
     (void)bt;
     return kill(getpid(), SIGTSTP);
+}
+
+int btui_clear(btui_t *bt, int mode)
+{
+    switch (mode) {
+        case _BTUI_CLEAR_BELOW:  return fputs("\033[J", bt->out);
+        case _BTUI_CLEAR_ABOVE:  return fputs("\033[1J", bt->out);
+        case _BTUI_CLEAR_SCREEN: return fputs("\033[2J", bt->out);
+        case _BTUI_CLEAR_RIGHT:  return fputs("\033[K", bt->out);
+        case _BTUI_CLEAR_LEFT:   return fputs("\033[1K", bt->out);
+        case _BTUI_CLEAR_LINE:   return fputs("\033[2K", bt->out);
+        default:                return -1;
+    }
 }
 
 #endif
