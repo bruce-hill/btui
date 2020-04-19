@@ -223,6 +223,7 @@ static int Lbtui_fillbox(lua_State *L)
     btui_fill_box(*bt, x, y, w, h);
     return 0;
 }
+
 static int Lbtui_shadow(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -237,6 +238,21 @@ static int Lbtui_shadow(lua_State *L)
     lua_Integer h = lua_tointegerx(L, 5, &isnum);
     if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
     btui_draw_shadow(*bt, x, y, w, h);
+    return 0;
+}
+
+static int Lbtui_scroll(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    int isnum;
+    lua_Integer firstline = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected integer for first line");
+    lua_Integer lastline = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected integer for last line");
+    lua_Integer scroll = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected integer for scroll amount");
+    btui_scroll(*bt, firstline, lastline, scroll);
     return 0;
 }
 
@@ -456,6 +472,7 @@ static const luaL_Reg Rclass_metamethods[] =
     {"suspend",         Lbtui_suspend},
     {"linebox",         Lbtui_linebox},
     {"fillbox",         Lbtui_fillbox},
+    {"scroll",          Lbtui_scroll},
     {"shadow",          Lbtui_shadow},
     {"width",           Lbtui_width},
     {"height",          Lbtui_height},

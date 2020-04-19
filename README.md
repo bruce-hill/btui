@@ -99,6 +99,7 @@ constants, including terminal escape values and keycodes.
     int     btui_move_cursor(btui_t *bt, int x, int y);
     #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
     int     btui_puts(btui_t *bt, const char *s);
+    int     btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount);
     int     btui_set_attributes(btui_t *bt, attr_t attrs);
     int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
     int     btui_set_bg_hex(btui_t *bt, int hex);

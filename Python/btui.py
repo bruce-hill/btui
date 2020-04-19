@@ -150,6 +150,13 @@ class BTUI:
         assert self._btui
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
 
+    def scroll(self, firstline, lastline=None, amount=None):
+        assert self._btui
+        if amount is None:
+            amount = firstline
+            firstline, lastline = 1, self.height
+        libbtui.btui_scroll(self._btui, firstline, lastline, amount)
+
     def flush(self):
         assert self._btui
         libbtui.btui_flush(self._btui)
