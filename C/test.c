@@ -9,9 +9,10 @@ int main(void)
     int x = 0, y = 0;
     while (!done) {
         const char *title = "BTUI C Demo";
-        btui_set_attributes(bt, BTUI_FG_BLUE | BTUI_BOLD);
+        btui_set_attributes(bt, BTUI_FG_BLUE | BTUI_BOLD | BTUI_UNDERLINE);
         btui_move_cursor(bt, (bt->width - (int)strlen(title)) / 2, 0);
         btui_printf(bt, "%s", title);
+        btui_set_attributes(bt, BTUI_NORMAL);
 
         btui_set_attributes(bt, BTUI_FG_NORMAL | BTUI_FAINT);
         btui_move_cursor(bt, 0, bt->height-1);

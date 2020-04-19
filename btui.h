@@ -30,7 +30,7 @@ int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y);
 int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
-int btui_set_attributes(btui_t *bt, unsigned long attrs);
+int btui_set_attributes(btui_t *bt, unsigned long long attrs);
 int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_fg_hex(btui_t *bt, int hex);
@@ -506,50 +506,51 @@ int btui_set_bg_hex(btui_t *bt, int hex)
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
 }
 
-const unsigned long BTUI_NORMAL               = 1ul << 0;
-const unsigned long BTUI_BOLD                 = 1ul << 1;
-const unsigned long BTUI_FAINT                = 1ul << 2;
-const unsigned long BTUI_ITALIC               = 1ul << 3;
-const unsigned long BTUI_UNDERLINE            = 1ul << 4;
-const unsigned long BTUI_BLINK_SLOW           = 1ul << 5;
-const unsigned long BTUI_BLINK_FAST           = 1ul << 6;
-const unsigned long BTUI_REVERSE              = 1ul << 7;
-const unsigned long BTUI_CONCEAL              = 1ul << 8;
-const unsigned long BTUI_STRIKETHROUGH        = 1ul << 9;
-const unsigned long BTUI_FRAKTUR              = 1ul << 20;
-const unsigned long BTUI_DOUBLE_UNDERLINE     = 1ul << 21;
-const unsigned long BTUI_NO_BOLD_OR_FAINT     = 1ul << 22;
-const unsigned long BTUI_NO_ITALIC_OR_FRAKTUR = 1ul << 23;
-const unsigned long BTUI_NO_UNDERLINE         = 1ul << 24;
-const unsigned long BTUI_NO_BLINK             = 1ul << 25;
-const unsigned long BTUI_NO_REVERSE           = 1ul << 27;
-const unsigned long BTUI_NO_CONCEAL           = 1ul << 28;
-const unsigned long BTUI_NO_STRIKETHROUGH     = 1ul << 29;
-const unsigned long BTUI_FG_BLACK             = 1ul << 30;
-const unsigned long BTUI_FG_RED               = 1ul << 31;
-const unsigned long BTUI_FG_GREEN             = 1ul << 32;
-const unsigned long BTUI_FG_YELLOW            = 1ul << 33;
-const unsigned long BTUI_FG_BLUE              = 1ul << 34;
-const unsigned long BTUI_FG_MAGENTA           = 1ul << 35;
-const unsigned long BTUI_FG_CYAN              = 1ul << 36;
-const unsigned long BTUI_FG_WHITE             = 1ul << 37;
+typedef unsigned long long attr_t;
+const attr_t BTUI_NORMAL               = 1ul << 0;
+const attr_t BTUI_BOLD                 = 1ul << 1;
+const attr_t BTUI_FAINT                = 1ul << 2;
+const attr_t BTUI_ITALIC               = 1ul << 3;
+const attr_t BTUI_UNDERLINE            = 1ul << 4;
+const attr_t BTUI_BLINK_SLOW           = 1ul << 5;
+const attr_t BTUI_BLINK_FAST           = 1ul << 6;
+const attr_t BTUI_REVERSE              = 1ul << 7;
+const attr_t BTUI_CONCEAL              = 1ul << 8;
+const attr_t BTUI_STRIKETHROUGH        = 1ul << 9;
+const attr_t BTUI_FRAKTUR              = 1ul << 20;
+const attr_t BTUI_DOUBLE_UNDERLINE     = 1ul << 21;
+const attr_t BTUI_NO_BOLD_OR_FAINT     = 1ul << 22;
+const attr_t BTUI_NO_ITALIC_OR_FRAKTUR = 1ul << 23;
+const attr_t BTUI_NO_UNDERLINE         = 1ul << 24;
+const attr_t BTUI_NO_BLINK             = 1ul << 25;
+const attr_t BTUI_NO_REVERSE           = 1ul << 27;
+const attr_t BTUI_NO_CONCEAL           = 1ul << 28;
+const attr_t BTUI_NO_STRIKETHROUGH     = 1ul << 29;
+const attr_t BTUI_FG_BLACK             = 1ul << 30;
+const attr_t BTUI_FG_RED               = 1ul << 31;
+const attr_t BTUI_FG_GREEN             = 1ul << 32;
+const attr_t BTUI_FG_YELLOW            = 1ul << 33;
+const attr_t BTUI_FG_BLUE              = 1ul << 34;
+const attr_t BTUI_FG_MAGENTA           = 1ul << 35;
+const attr_t BTUI_FG_CYAN              = 1ul << 36;
+const attr_t BTUI_FG_WHITE             = 1ul << 37;
 // 38: 256/24bit color
-const unsigned long BTUI_FG_NORMAL            = 1ul << 39;
-const unsigned long BTUI_BG_BLACK             = 1ul << 40;
-const unsigned long BTUI_BG_RED               = 1ul << 41;
-const unsigned long BTUI_BG_GREEN             = 1ul << 42;
-const unsigned long BTUI_BG_YELLOW            = 1ul << 43;
-const unsigned long BTUI_BG_BLUE              = 1ul << 44;
-const unsigned long BTUI_BG_MAGENTA           = 1ul << 45;
-const unsigned long BTUI_BG_CYAN              = 1ul << 46;
-const unsigned long BTUI_BG_WHITE             = 1ul << 47;
+const attr_t BTUI_FG_NORMAL            = 1ul << 39;
+const attr_t BTUI_BG_BLACK             = 1ul << 40;
+const attr_t BTUI_BG_RED               = 1ul << 41;
+const attr_t BTUI_BG_GREEN             = 1ul << 42;
+const attr_t BTUI_BG_YELLOW            = 1ul << 43;
+const attr_t BTUI_BG_BLUE              = 1ul << 44;
+const attr_t BTUI_BG_MAGENTA           = 1ul << 45;
+const attr_t BTUI_BG_CYAN              = 1ul << 46;
+const attr_t BTUI_BG_WHITE             = 1ul << 47;
 // 48: 256/24bit color
-const unsigned long BTUI_BG_NORMAL            = 1ul << 49;
-const unsigned long BTUI_FRAMED               = 1ul << 51;
-const unsigned long BTUI_ENCIRCLED            = 1ul << 52;
-const unsigned long BTUI_OVERLINED            = 1ul << 53;
+const attr_t BTUI_BG_NORMAL            = 1ul << 49;
+const attr_t BTUI_FRAMED               = 1ul << 51;
+const attr_t BTUI_ENCIRCLED            = 1ul << 52;
+const attr_t BTUI_OVERLINED            = 1ul << 53;
 
-int btui_set_attributes(btui_t *bt, unsigned long attrs)
+int btui_set_attributes(btui_t *bt, unsigned long long attrs)
 {
     int printed = fputs("\033[", bt->out);
     for (int i = 0; i < 64; i++) {

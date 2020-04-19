@@ -14,9 +14,11 @@ btui(function(bt)
         if key == "e" then error("ERR MESSAGE") end
 
         local title = "Lua BTUI Demo"
-        bt:withfg(100,200,255, function()
-            bt:move(math.floor((bt:width()-#title)/2), 0)
-            bt:print(title)
+        bt:withattributes("bold", "underline", function()
+            bt:withfg(100,200,255, function()
+                bt:move(math.floor((bt:width()-#title)/2), 0)
+                bt:print(title)
+            end)
         end)
 
         local s = ("Size: (%dx%d)"):format(bt:width(), bt:height())
