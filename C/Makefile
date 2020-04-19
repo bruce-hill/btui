@@ -7,13 +7,19 @@ CWARN=-Wall -Wpedantic -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializ
 #CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 G=
 
-all: ctest
+all: ctest rainbow
 
 clean:
 	rm -f test
 
 ctest: test.c ../btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $< -o $@
+
+rainbow: rainbow.c ../btui.h
+	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) -lm $< -o $@
+
+rainbowdemo: rainbow
+	./rainbow
 
 test: ctest
 	./ctest

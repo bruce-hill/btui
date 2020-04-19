@@ -26,6 +26,9 @@ c:
 testc:
 	@cd C; make test
 
+rainbow:
+	@cd C; make rainbowdemo
+
 lua:
 	@cd Lua; make
 
