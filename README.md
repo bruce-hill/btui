@@ -20,13 +20,11 @@ temporarily drop back to the regular shell). However, BTUI will always
 automatically put the terminal back in a normal state when your program exits,
 even in the event of a segfault or other blockable signal. BTUI can't do
 anything about unblockable signals like SIGKILL though, so don't use `killall
--9 myprog` unless you want a gunked up terminal, just use `kill myprog`
-instead. If your terminal *does* get gunked up, you can always run the `reset`
+-9 myprog` unless you want a gunked up terminal (just use `kill myprog`
+instead). If your terminal *does* get gunked up, you can always run the `reset`
 shell command to reset it.
 
 ## Easy 24-bit Colors
-
-![Rainbow!](rainbow.png)
 
 BTUI supports 24-bit colors. It's dead easy, just `btui_set_fg(bt, r, g, b)`
 (foreground color) or `btui_set_bg(bt, r, g, b)` (background color). Try `make
@@ -35,6 +33,8 @@ most terminals for aeons, but most TUI applications still default to using the
 same 8 colors. It doesn't have to be that way! (Although you can still use
 those colors with `btui_set_attributes(bt, BTUI_BG_RED | BTUI_FG_BLACK)` and so
 forth.)
+
+![Rainbow!](rainbow.png)
 
 ## User Input
 
