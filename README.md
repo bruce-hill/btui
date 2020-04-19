@@ -23,6 +23,8 @@ shell command to reset it.
 
 ## Easy 24-bit Colors
 
+![Rainbow!](rainbow.png)
+
 BTUI supports 24-bit colors. It's dead easy, just `btui_set_fg(bt, r, g, b)`
 (foreground color) or `btui_set_bg(bt, r, g, b)` (background color). Try `make
 rainbow` to see a demo of 24-bit colors in action. This has been supported by
