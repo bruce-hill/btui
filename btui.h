@@ -18,7 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BTUI_VERSION 1
+#define BTUI_VERSION 2
 
 typedef struct {
     FILE *in, *out;
