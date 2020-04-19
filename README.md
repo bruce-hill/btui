@@ -168,34 +168,35 @@ with btui.open_btui() as bt:
 The returned object has the following methods:
 
 ```python
-def enable(self):
-def disable(self):
-@contextmanager
-def disabled(self):
-def getkey(self, timeout=None): # returns key, mouse_x, mouse_y
-@property
-def width(self):
-@property
-def height(self):
-def write(self, *args, sep=''):
-def write_bytes(self, b):
-def move(self, x, y):
-def flush(self):
-def suspend(self):
-def clear(self, mode='screen'):
-def set_attributes(self, *attrs):
-def unset_attributes(self, *attrs):
-@contextmanager
-def attributes(self, *attrs):
-def set_fg(self, r, g, b):
-def set_bg(self, r, g, b):
-@contextmanager
-def fg(self, r, g, b):
-@contextmanager
-def bg(self, r, g, b):
-def outline_box(self, x, y, w, h):
-def fill_box(self, x, y, w, h):
-def draw_shadow(self, x, y, w, h):
+class BTUI:
+    def enable(self):
+    def disable(self):
+    @contextmanager
+    def disabled(self):
+    def getkey(self, timeout=None): # returns key, mouse_x, mouse_y
+    @property
+    def width(self):
+    @property
+    def height(self):
+    def write(self, *args, sep=''):
+    def write_bytes(self, b):
+    def move(self, x, y):
+    def flush(self):
+    def suspend(self):
+    def clear(self, mode='screen'):
+    def set_attributes(self, *attrs):
+    def unset_attributes(self, *attrs):
+    @contextmanager
+    def attributes(self, *attrs):
+    def set_fg(self, r, g, b):
+    def set_bg(self, r, g, b):
+    @contextmanager
+    def fg(self, r, g, b):
+    @contextmanager
+    def bg(self, r, g, b):
+    def outline_box(self, x, y, w, h):
+    def fill_box(self, x, y, w, h):
+    def draw_shadow(self, x, y, w, h):
 ```
 
 See [Python/test.py](Python/test.py) for example code, which can be run with
