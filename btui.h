@@ -49,6 +49,9 @@ int btui_set_bg_hex(btui_t *bt, int hex);
 #define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
 #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
 #define btui_suspend(bt) kill(getpid(), SIGTSTP)
+void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
 
 static btui_t current_bt;
 
@@ -588,6 +591,55 @@ int btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount)
                        firstline, lastline, -scroll_amount);
     }
     return 0;
+}
+
+void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h)
+{
+    btui_move_cursor(bt, x-1, y-1);
+    // Top row
+    fputs("\033(0l", bt->out);
+    for (int i = 0; i < w; i++)
+       fputc('q', bt->out);
+    fputc('k', bt->out);
+    // Side walls
+    for (int i = 0; i < h; i++) {
+        btui_move_cursor(bt, x-1, y + i);
+        fputc('x', bt->out);
+        btui_move_cursor(bt, x + w, y + i);
+        fputc('x', bt->out);
+    }
+    // Bottom row
+    btui_move_cursor(bt, x-1, y + h);
+    fputc('m', bt->out);
+    for (int i = 0; i < w; i++)
+       fputc('q', bt->out);
+    fputs("j\033(B", bt->out);
+}
+
+void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
+{
+    int left = x, bottom = y + h;
+    for ( ; y < bottom; y++) {
+        x = left;
+        btui_move_cursor(bt, x, y);
+        for ( ; x < left + w; x++) {
+            fputc(' ', bt->out);
+        }
+    }
+}
+
+void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
+{
+    fputs("\033(0", bt->out);
+    for (int i = 0; i < h-1; i++) {
+        btui_move_cursor(bt, x + w, y + 1 + i);
+        fputc('a', bt->out);
+    }
+    btui_move_cursor(bt, x + 1, y + h);
+    for (int i = 0; i < w; i++) {
+        fputc('a', bt->out);
+    }
+    fputs("\033(B", bt->out);
 }
 
 #endif

@@ -191,6 +191,56 @@ static int Lbtui_withbg(lua_State *L)
     return lua_gettop(L) - top;
 }
 
+static int Lbtui_linebox(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    int isnum;
+    lua_Integer x = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
+    lua_Integer y = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
+    lua_Integer w = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
+    lua_Integer h = lua_tointegerx(L, 5, &isnum);
+    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    btui_draw_linebox(*bt, x, y, w, h);
+    return 0;
+}
+
+static int Lbtui_fillbox(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    int isnum;
+    lua_Integer x = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
+    lua_Integer y = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
+    lua_Integer w = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
+    lua_Integer h = lua_tointegerx(L, 5, &isnum);
+    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    btui_fill_box(*bt, x, y, w, h);
+    return 0;
+}
+static int Lbtui_shadow(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    int isnum;
+    lua_Integer x = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
+    lua_Integer y = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
+    lua_Integer w = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
+    lua_Integer h = lua_tointegerx(L, 5, &isnum);
+    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    btui_draw_shadow(*bt, x, y, w, h);
+    return 0;
+}
+
 static int Lbtui_setattributes(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -405,6 +455,9 @@ static const luaL_Reg Rclass_metamethods[] =
     {"setattributes",   Lbtui_setattributes},
     {"unsetattributes", Lbtui_unsetattributes},
     {"suspend",         Lbtui_suspend},
+    {"linebox",         Lbtui_linebox},
+    {"fillbox",         Lbtui_fillbox},
+    {"shadow",          Lbtui_shadow},
     {"width",           Lbtui_width},
     {"height",          Lbtui_height},
     {NULL,              NULL}

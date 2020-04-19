@@ -2,7 +2,7 @@ local btui = require("btui")
 
 btui(function(bt)
     local key = nil
-    local x, y = 0, 0
+    local x, y = 1, 1
     while key ~= "q" and key ~= "Ctrl-c" do
         if key == "?" then
             bt:withdisabled(function()
@@ -15,19 +15,21 @@ btui(function(bt)
         end
 
         bt:clear()
-        bt:move(x, y)
-        bt:withbg(.8,.95,.2, function()
-            bt:withfg(0,0,0, function()
-                bt:print(" Pressed: ", key, " ")
-            end)
+
+        bt:withfg(.8,.95,.2, function()
+            bt:linebox(x, y, 30, 1);
+            bt:move(x, y)
+            bt:print("Pressed: ", key)
         end)
 
-        local title = "Lua BTUI Demo"
-        bt:withattributes("bold", "underline", function()
-            bt:withfg(100,200,255, function()
-                bt:move(math.floor((bt:width()-#title)/2), 0)
-                bt:print(title)
-            end)
+        bt:withattributes("bg_blue", "fg_black", function()
+            local title = "Lua BTUI Demo"
+            local w = #title
+            local center = math.floor((bt:width() - w) / 2)
+            bt:fillbox(center-2, 0, w+4, 3)
+            bt:shadow(center-2, 0, w+4, 3)
+            bt:move(center, 1)
+            bt:print(title)
         end)
 
         local s = ("Size: (%dx%d)"):format(bt:width(), bt:height())
