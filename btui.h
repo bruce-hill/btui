@@ -20,36 +20,6 @@
 
 #define BTUI_VERSION 2
 
-typedef struct {
-    FILE *in, *out;
-    int width, height;
-    int size_changed;
-} btui_t;
-
-typedef unsigned long long attr_t;
-
-int btui_clear(btui_t *bt, int mode);
-void btui_disable(btui_t *bt);
-void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
-btui_t* btui_enable(void);
-void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-int btui_flush(btui_t *bt);
-int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
-char *btui_keyname(int key, char *buf);
-int btui_keynamed(const char *name);
-int btui_move_cursor(btui_t *bt, int x, int y);
-#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
-int btui_puts(btui_t *bt, const char *s);
-int btui_set_attributes(btui_t *bt, attr_t attrs);
-int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-int btui_set_bg_hex(btui_t *bt, int hex);
-int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-int btui_set_fg_hex(btui_t *bt, int hex);
-int btui_suspend(btui_t *bt);
-
-static btui_t current_bt;
-
 // Terminal escape sequences:
 #define T_WRAP        "7"
 #define T_SHOW_CURSOR "25"
@@ -59,9 +29,8 @@ static btui_t current_bt;
 #define T_ALT_SCREEN  "1049"
 #define T_ON(opt)  "\033[?" opt "h"
 #define T_OFF(opt) "\033[?" opt "l"
-
-static const char *TUI_ENTER = T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
-static const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m";
+#define TUI_ENTER T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR)
+#define TUI_LEAVE  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m"
 
 // Maximum time in milliseconds between double clicks
 #ifndef DOUBLECLICK_THRESHOLD
@@ -74,6 +43,36 @@ static const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREE
 #define MOD_CTRL   (1 << (MOD_BITSHIFT + 1))
 #define MOD_ALT    (1 << (MOD_BITSHIFT + 2))
 #define MOD_SHIFT  (1 << (MOD_BITSHIFT + 3))
+
+typedef struct {
+    FILE *in, *out;
+    int width, height;
+    int size_changed;
+} btui_t;
+
+typedef unsigned long long attr_t;
+
+int     btui_clear(btui_t *bt, int mode);
+void    btui_disable(btui_t *bt);
+void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+btui_t* btui_enable(void);
+void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+int     btui_flush(btui_t *bt);
+int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
+char    *btui_keyname(int key, char *buf);
+int     btui_keynamed(const char *name);
+int     btui_move_cursor(btui_t *bt, int x, int y);
+#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
+int     btui_puts(btui_t *bt, const char *s);
+int     btui_set_attributes(btui_t *bt, attr_t attrs);
+int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int     btui_set_bg_hex(btui_t *bt, int hex);
+int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int     btui_set_fg_hex(btui_t *bt, int hex);
+int     btui_suspend(btui_t *bt);
+
+static btui_t current_bt;
 
 typedef enum {
     // ASCII chars:
@@ -99,6 +98,22 @@ typedef enum {
     MOUSE_WHEEL_RELEASE, MOUSE_WHEEL_PRESS,
 } btui_key_t;
 
+// Overlapping key codes:
+#define KEY_CTRL_BACKTICK  KEY_CTRL_AT
+#define KEY_CTRL_2         KEY_CTRL_AT
+#define KEY_BACKSPACE      KEY_CTRL_H
+#define KEY_TAB            KEY_CTRL_I
+#define KEY_ENTER          KEY_CTRL_M
+#define KEY_ESC            KEY_CTRL_LSQ_BRACKET
+#define KEY_CTRL_3         KEY_CTRL_LSQ_BRACKET
+#define KEY_CTRL_4         KEY_CTRL_BACKSLASH
+#define KEY_CTRL_5         KEY_CTRL_RSQ_BRACKET
+#define KEY_CTRL_TILDE     KEY_CTRL_CARET
+#define KEY_CTRL_6         KEY_CTRL_CARET
+#define KEY_CTRL_7         KEY_CTRL_UNDERSCORE
+#define KEY_CTRL_SLASH     KEY_CTRL_UNDERSCORE
+#define KEY_CTRL_8         KEY_BACKSPACE2
+
 #define _BTUI_CLEAR_SCREEN 0
 #define _BTUI_CLEAR_ABOVE  1
 #define _BTUI_CLEAR_BELOW  2
@@ -106,30 +121,14 @@ typedef enum {
 #define _BTUI_CLEAR_LEFT   4
 #define _BTUI_CLEAR_RIGHT  5
 
+// Defined as both `#define` and `const int` so that these values can work in
+// switch statements and still be available to Python.
 const int BTUI_CLEAR_SCREEN = _BTUI_CLEAR_SCREEN;
 const int BTUI_CLEAR_ABOVE  = _BTUI_CLEAR_ABOVE;
 const int BTUI_CLEAR_BELOW  = _BTUI_CLEAR_BELOW;
 const int BTUI_CLEAR_LINE   = _BTUI_CLEAR_LINE;
 const int BTUI_CLEAR_LEFT   = _BTUI_CLEAR_LEFT;
 const int BTUI_CLEAR_RIGHT  = _BTUI_CLEAR_RIGHT;
-
-// Overlapping key codes:
-#define KEY_CTRL_BACKTICK  0x00 /* clash with ^@ */
-#define KEY_CTRL_2         0x00 /* clash with ^@ */
-#define KEY_BACKSPACE      0x08 /* clash with ^H */
-#define KEY_TAB            0x09 /* clash with ^I */
-#define KEY_ENTER          0x0D /* clash with ^M */
-#define KEY_ESC            0x1B /* clash with ^[ */
-#define KEY_CTRL_3         0x1B /* clash with ^[ */
-#define KEY_CTRL_4         0x1C /* clash with ^\ */
-#define KEY_CTRL_5         0x1D /* clash with ^] */
-#define KEY_CTRL_TILDE     0x1E /* clash with ^^ */
-#define KEY_CTRL_6         0x1E /* clash with ^^ */
-#define KEY_CTRL_7         0x1F /* clash with ^_ */
-#define KEY_CTRL_SLASH     0x1F /* clash with ^_ */
-#define KEY_SPACE          0x20
-#define KEY_BACKSPACE2     0x7F
-#define KEY_CTRL_8         0x7F /* clash with 'BACKSPACE2' */
 
 typedef struct {
     int key;
@@ -138,10 +137,8 @@ typedef struct {
 
 static keyname_t key_names[] = {
     {KEY_SPACE, "Space"}, {KEY_BACKSPACE2, "Backspace"},
-    {KEY_F1, "F1"}, {KEY_F2, "F2"}, {KEY_F3, "F3"}, {KEY_F4, "F4"}, {KEY_F5, "F5"},
-    {KEY_F6, "F6"}, {KEY_F7, "F7"}, {KEY_F8, "F8"}, {KEY_F9, "F9"}, {KEY_F10, "F10"},
-    {KEY_F11, "F11"}, {KEY_F12, "F12"},
     {KEY_INSERT, "Insert"}, {KEY_DELETE, "Delete"},
+    {KEY_TAB, "Tab"}, {KEY_ENTER, "Enter"}, {KEY_ENTER, "Return"},
     {KEY_HOME, "Home"}, {KEY_END, "End"},
     {KEY_PGUP, "PgUp"}, {KEY_PGUP, "Page Up"},
     {KEY_PGDN, "PgDn"}, {KEY_PGDN, "Page Down"},
@@ -153,7 +150,7 @@ static keyname_t key_names[] = {
     {MOUSE_LEFT_RELEASE, "Left click"}, {MOUSE_RIGHT_RELEASE, "Right click"}, {MOUSE_MIDDLE_RELEASE, "Middle click"},
     {MOUSE_LEFT_DOUBLE, "Double left click"}, {MOUSE_RIGHT_DOUBLE, "Double right click"}, {MOUSE_MIDDLE_DOUBLE, "Double middle click"},
     {MOUSE_WHEEL_RELEASE, "Mouse wheel up"}, {MOUSE_WHEEL_PRESS, "Mouse wheel down"},
-    {KEY_TAB, "Tab"}, {KEY_ENTER, "Enter"}, {KEY_ENTER, "Return"},
+    {KEY_ESC, "Esc"}, {KEY_ESC, "Escape"},
     {KEY_CTRL_A, "Ctrl-a"}, {KEY_CTRL_B, "Ctrl-b"}, {KEY_CTRL_C, "Ctrl-c"},
     {KEY_CTRL_D, "Ctrl-d"}, {KEY_CTRL_E, "Ctrl-e"}, {KEY_CTRL_F, "Ctrl-f"},
     {KEY_CTRL_G, "Ctrl-g"}, {KEY_CTRL_H, "Ctrl-h"}, {KEY_CTRL_I, "Ctrl-i"},
@@ -163,7 +160,6 @@ static keyname_t key_names[] = {
     {KEY_CTRL_S, "Ctrl-s"}, {KEY_CTRL_T, "Ctrl-t"}, {KEY_CTRL_U, "Ctrl-u"},
     {KEY_CTRL_V, "Ctrl-v"}, {KEY_CTRL_W, "Ctrl-w"}, {KEY_CTRL_X, "Ctrl-x"},
     {KEY_CTRL_Y, "Ctrl-y"}, {KEY_CTRL_Z, "Ctrl-z"},
-    {KEY_ESC, "Esc"}, {KEY_ESC, "Escape"},
     {KEY_CTRL_TILDE, "Ctrl-~"}, {KEY_CTRL_BACKSLASH, "Ctrl-\\"},
     {KEY_CTRL_LSQ_BRACKET, "Ctrl-]"}, {KEY_CTRL_RSQ_BRACKET, "Ctrl-]"},
     {KEY_CTRL_UNDERSCORE, "Ctrl-_"}, {KEY_CTRL_SLASH, "Ctrl-/"},
@@ -172,7 +168,9 @@ static keyname_t key_names[] = {
     {KEY_CTRL_2, "Ctrl-2"}, {KEY_CTRL_3, "Ctrl-3"}, {KEY_CTRL_4, "Ctrl-4"},
     {KEY_CTRL_5, "Ctrl-5"}, {KEY_CTRL_6, "Ctrl-6"}, {KEY_CTRL_7, "Ctrl-7"},
     {KEY_CTRL_5, "Ctrl-8"}, {KEY_CTRL_6, "Ctrl-9"},
-    {':', "Colon"},
+    {KEY_F1, "F1"}, {KEY_F2, "F2"}, {KEY_F3, "F3"}, {KEY_F4, "F4"}, {KEY_F5, "F5"},
+    {KEY_F6, "F6"}, {KEY_F7, "F7"}, {KEY_F8, "F8"}, {KEY_F9, "F9"}, {KEY_F10, "F10"},
+    {KEY_F11, "F11"}, {KEY_F12, "F12"},
 };
 
 static const struct termios normal_termios = {

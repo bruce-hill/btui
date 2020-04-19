@@ -86,25 +86,25 @@ BTUI comes with bindings for C, Python, and Lua.
 BTUI has the following C function definitions, as well as definitions for some
 constants, including terminal escape values and keycodes.
 
-    int btui_clear(btui_t *bt, int mode);
-    void btui_disable(btui_t *bt);
-    void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-    void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+    int     btui_clear(btui_t *bt, int mode);
+    void    btui_disable(btui_t *bt);
+    void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+    void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
     btui_t* btui_enable(void);
-    void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-    int btui_flush(btui_t *bt);
-    int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
-    char *btui_keyname(int key, char *buf);
-    int btui_keynamed(const char *name);
-    int btui_move_cursor(btui_t *bt, int x, int y);
+    void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+    int     btui_flush(btui_t *bt);
+    int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
+    char    *btui_keyname(int key, char *buf);
+    int     btui_keynamed(const char *name);
+    int     btui_move_cursor(btui_t *bt, int x, int y);
     #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
-    int btui_puts(btui_t *bt, const char *s);
-    int btui_set_attributes(btui_t *bt, attr_t attrs);
-    int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int btui_set_bg_hex(btui_t *bt, int hex);
-    int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int btui_set_fg_hex(btui_t *bt, int hex);
-    int btui_suspend(btui_t *bt);
+    int     btui_puts(btui_t *bt, const char *s);
+    int     btui_set_attributes(btui_t *bt, attr_t attrs);
+    int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+    int     btui_set_bg_hex(btui_t *bt, int hex);
+    int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+    int     btui_set_fg_hex(btui_t *bt, int hex);
+    int     btui_suspend(btui_t *bt);
 
 See [C/test.c](C/test.c) and [C/rainbow.c](C/rainbow.c) for example usage. You
 can run `make testc` to run the C test demo and `make rainbow` to run the
