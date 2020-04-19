@@ -61,10 +61,12 @@ key handling can be improved slightly by polling with zero timeout.
 * Don't clear the screen unless you need to. It causes a lot of unnecessary
   redrawing.
 
-* A good pattern to follow is: draw things from left to right, clearing to
-  the right after each item. Then, once everything has been drawn, clear
-  to the bottom of the screen. If you follow this approach, you won't have
-  to worry too much about the screen width of the things you're writing.
+* A good pattern to follow is: draw things from left to right, clearing to the
+  right after each item. Then, once everything has been drawn, clear to the
+  bottom of the screen. If you follow this approach, you won't have to worry
+  too much about the screen width of the things you're writing. Also, the
+  terminal won't flicker, since you're never blanking the whole screen, only
+  part of a line at a time.
 
 * Text wrapping must be done manually, since many terminals do not support
   wrapping around to any point other than the first column, which is useless
