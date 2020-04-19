@@ -33,6 +33,17 @@ int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
 int btui_set_attributes(btui_t *bt, unsigned long attrs);
+int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_fg_hex(btui_t *bt, int hex);
+int btui_set_bg_hex(btui_t *bt, int hex);
+#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
+#define btui_flush(bt) fflush((bt)->out)
+#define btui_clear(bt) fputs("\033[2J", (bt)->out)
+#define btui_clear_below(bt) fputs("\033[J", (bt)->out)
+#define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
+#define btui_clear_eol(bt) fputs("\033[K", (bt)->out)
+#define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
 
 // Terminal escape sequences:
 #define T_WRAP        "7"
@@ -472,23 +483,23 @@ int btui_move_cursor(btui_t *bt, int x, int y)
     return fprintf(bt->out, "\033[%d;%dH", y+1, x+1);
 }
 
-int set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[38;2;%d;%d;%dm", r, g, b);
 }
 
-int set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm", r, g, b);
 }
 
-int set_fg_hex(btui_t *bt, int hex)
+int btui_set_fg_hex(btui_t *bt, int hex)
 {
     return fprintf(bt->out, "\033[38;2;%d;%d;%dm",
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
 }
 
-int set_bg_hex(btui_t *bt, int hex)
+int btui_set_bg_hex(btui_t *bt, int hex)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm",
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
@@ -551,6 +562,18 @@ int btui_set_attributes(btui_t *bt, unsigned long attrs)
     }
     printed += fputs("m", bt->out);
     return printed;
+}
+
+int btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount)
+{
+    if (scroll_amount > 0) {
+        return fprintf(bt->out, "\033[%d;%dr\033[%dS\033[r",
+                       firstline, lastline, scroll_amount);
+    } else if (scroll_amount < 0) {
+        return fprintf(bt->out, "\033[%d;%dr\033[%dT\033[r",
+                       firstline, lastline, -scroll_amount);
+    }
+    return 0;
 }
 
 #endif
