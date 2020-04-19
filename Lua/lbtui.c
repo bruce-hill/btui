@@ -149,13 +149,16 @@ static int Lbtui_withfg(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
     int isnum;
-    int r = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer r value");
-    int g = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer g value");
-    int b = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer b value");
-    btui_set_fg_rgb(*bt, r, g, b);
+    lua_Number r = lua_tonumberx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected number for red value");
+    lua_Number g = lua_tonumberx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected number for green value");
+    lua_Number b = lua_tonumberx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected number for blue value");
+    btui_set_fg(*bt,
+                r < 0.0 ? 0 : (r > 1.0 ? 255 : (int)(255.0 * r)),
+                g < 0.0 ? 0 : (g > 1.0 ? 255 : (int)(255.0 * g)),
+                b < 0.0 ? 0 : (b > 1.0 ? 255 : (int)(255.0 * b)));
     int top = lua_gettop(L);
     int status = lua_pcall(L, 0, LUA_MULTRET, 0);
     btui_set_attributes(*bt, BTUI_FG_NORMAL);
@@ -170,13 +173,16 @@ static int Lbtui_withbg(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
     int isnum;
-    int r = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer r value");
-    int g = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer g value");
-    int b = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer b value");
-    btui_set_bg_rgb(*bt, r, g, b);
+    lua_Number r = lua_tonumberx(L, 2, &isnum);
+    if (!isnum) luaL_argerror(L, 2, "expected number for red value");
+    lua_Number g = lua_tonumberx(L, 3, &isnum);
+    if (!isnum) luaL_argerror(L, 3, "expected number for green value");
+    lua_Number b = lua_tonumberx(L, 4, &isnum);
+    if (!isnum) luaL_argerror(L, 4, "expected number for blue value");
+    btui_set_bg(*bt,
+                r < 0.0 ? 0 : (r > 1.0 ? 255 : (int)(255.0 * r)),
+                g < 0.0 ? 0 : (g > 1.0 ? 255 : (int)(255.0 * g)),
+                b < 0.0 ? 0 : (b > 1.0 ? 255 : (int)(255.0 * b)));
     int top = lua_gettop(L);
     int status = lua_pcall(L, 0, LUA_MULTRET, 0);
     btui_set_attributes(*bt, BTUI_BG_NORMAL);

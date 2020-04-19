@@ -35,8 +35,8 @@ int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
 int btui_set_attributes(btui_t *bt, attr_t attrs);
-int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_fg_hex(btui_t *bt, int hex);
 int btui_set_bg_hex(btui_t *bt, int hex);
 #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
@@ -497,12 +497,12 @@ int btui_move_cursor(btui_t *bt, int x, int y)
     return fprintf(bt->out, "\033[%d;%dH", y+1, x+1);
 }
 
-int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[38;2;%d;%d;%dm", r, g, b);
 }
 
-int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
+int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm", r, g, b);
 }

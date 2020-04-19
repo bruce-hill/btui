@@ -16,7 +16,7 @@ btui(function(bt)
 
         bt:clear()
         bt:move(x, y)
-        bt:withbg(150,225,80, function()
+        bt:withbg(.8,.95,.2, function()
             bt:withfg(0,0,0, function()
                 bt:print(" Pressed: ", key, " ")
             end)
