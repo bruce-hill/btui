@@ -2,15 +2,14 @@
 
 BTUI is a minimal, embeddable single header file alternative to bloatware like
 ncurses. BTUI aims to be less than 1% the size of
-ncurses,<sup>1(#footnote1)</sup> while also providing a better API for the
+ncurses,^1 while also providing a better API for the
 programmer who is not afraid to roll up their sleeves and manage their own
 state. If you want a drop-in TUI library that lets you switch into TUI mode,
 write some strings to the screen with 24-bit color, and get user keypresses,
 then this is the library for you!
 
-<a name="footnote1">1</a>: Currently, BTUI is somewhere between 0.5% and 0.1%
-the size of ncurses, but even *counting the number of lines of code in ncurses*
-is hard.
+Footnote 1: Currently, BTUI is somewhere between 0.5% and 0.1% the size of
+ncurses, but even *counting the number of lines of code in ncurses* is hard.
 
 ## Cleanup by Default
 
