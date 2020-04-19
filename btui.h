@@ -48,6 +48,7 @@ int btui_set_bg_hex(btui_t *bt, int hex);
 #define btui_clear_right(bt) fputs("\033[K", (bt)->out)
 #define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
 #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
+#define btui_suspend(bt) kill(getpid(), SIGTSTP)
 
 static btui_t current_bt;
 

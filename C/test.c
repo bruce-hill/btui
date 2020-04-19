@@ -25,6 +25,9 @@ int main(void)
         btui_clear_screen(bt);
         switch (key) {
             case 'q': case KEY_CTRL_C: done = 1; break;
+            case KEY_CTRL_Z:
+                btui_suspend(bt);
+                break;
             case -1: break;
             case KEY_ARROW_DOWN:
                 btui_scroll(bt, 1, bt->height-1, +1);

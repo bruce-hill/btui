@@ -10,6 +10,8 @@ btui(function(bt)
                 io.flush()
                 io.read()
             end)
+        elseif key == "Ctrl-z" then
+            bt:suspend()
         end
 
         bt:clear()

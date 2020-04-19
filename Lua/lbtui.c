@@ -225,6 +225,14 @@ static int Lbtui_unsetattributes(lua_State *L)
     return 0;
 }
 
+static int Lbtui_suspend(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    btui_suspend(bt);
+    return 0;
+}
+
 static int Lbtui_withattributes(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -390,6 +398,7 @@ static const luaL_Reg Rclass_metamethods[] =
     {"withattributes",  Lbtui_withattributes},
     {"setattributes",   Lbtui_setattributes},
     {"unsetattributes", Lbtui_unsetattributes},
+    {"suspend",         Lbtui_suspend},
     {"width",           Lbtui_width},
     {"height",          Lbtui_height},
     {NULL,              NULL}
