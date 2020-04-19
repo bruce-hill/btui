@@ -35,4 +35,10 @@ lua:
 testlua:
 	@cd Lua; make test
 
-.PHONY: all, checksyntax, clean, c, testc, lua, testlua
+python:
+	@cd Python; make
+
+testpython:
+	@cd Python; make test
+
+.PHONY: all, checksyntax, clean, c, testc, lua, testlua, python, testpython
