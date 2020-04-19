@@ -7,7 +7,7 @@ CWARN=-Wall -Wpedantic -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializ
 #CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 G=
 
-all:
+all: ctest
 
 clean:
 	rm -f test
