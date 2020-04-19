@@ -110,7 +110,9 @@ constants, including terminal escape values and keycodes.
     void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
     void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
 
-See [C/test.c](C/test.c) for example usage.
+See [C/test.c](C/test.c) and [C/rainbow.c](C/rainbow.c) for example usage. You
+can run `make testc` to run the C test demo and `make rainbow` to run the
+rainbow C demo.
 
 ### Lua API
 
@@ -145,7 +147,8 @@ before the error is printed. Here's a simple example program:
     bt:width() -- Return the scren width
     bt:height() -- Return the screen height
 
-See [Lua/test.lua](Lua/test.lua) for example usage.
+See [Lua/test.lua](Lua/test.lua) for example usage. Run `make lua` to build the
+Lua library, and `make testlua` to run the Lua BTUI demo.
 
 ### Python API
 
