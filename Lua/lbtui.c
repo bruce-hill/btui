@@ -38,6 +38,28 @@ static int Lbtui_disable(lua_State *L)
     return 0;
 }
 
+static int Lbtui_withdisabled(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    int top = lua_gettop(L);
+    if (top < 2) luaL_error(L, "No function provided");
+
+    lua_pushcfunction(L, Lbtui_disable);
+    lua_pushvalue(L, 1);
+    lua_call(L, 1, 0);
+
+    lua_pushvalue(L, 2);
+    lua_call(L, 0, LUA_MULTRET);
+    int top2 = lua_gettop(L);
+
+    lua_pushcfunction(L, Lbtui_enable);
+    lua_pushvalue(L, 1);
+    lua_call(L, 1, 0);
+
+    return top2 - top;
+}
+
 static int Lbtui_getkey(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -74,7 +96,31 @@ static int Lbtui_clear(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    btui_clear(*bt);
+    const char *cleartype = luaL_optlstring(L, 2, "screen", NULL);
+    if (strcmp(cleartype, "screen") == 0) {
+        btui_clear_screen(*bt);
+    } else if (strcmp(cleartype, "below") == 0) {
+        btui_clear_below(*bt);
+    } else if (strcmp(cleartype, "above") == 0) {
+        btui_clear_above(*bt);
+    } else if (strcmp(cleartype, "right") == 0) {
+        btui_clear_right(*bt);
+    } else if (strcmp(cleartype, "left") == 0) {
+        btui_clear_left(*bt);
+    } else if (strcmp(cleartype, "line") == 0) {
+        btui_clear_line(*bt);
+    } else {
+        luaL_argerror(L, 2, "unknown clear type");
+    }
+    btui_flush(*bt);
+    return 0;
+}
+
+static int Lbtui_flush(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    btui_clear_screen(*bt);
     btui_flush(*bt);
     return 0;
 }
@@ -237,25 +283,6 @@ static int Lbtui_tostring(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg Rclass_metamethods[] =
-{
-    {"__tostring",      Lbtui_tostring},
-    {"enable",          Lbtui_enable},
-    {"disable",         Lbtui_disable},
-    {"getkey",          Lbtui_getkey},
-    {"print",           Lbtui_print},
-    {"clear",           Lbtui_clear},
-    {"move",            Lbtui_move},
-    {"withfg",          Lbtui_withfg},
-    {"withbg",          Lbtui_withbg},
-    {"withattributes",  Lbtui_withattributes},
-    {"setattributes",   Lbtui_setattributes},
-    {"unsetattributes", Lbtui_unsetattributes},
-    {"width",           Lbtui_width},
-    {"height",          Lbtui_height},
-    {NULL,              NULL}
-};
-
 static struct {
     const char* name;
     lua_Unsigned code;
@@ -342,6 +369,27 @@ static struct {
     {"bg_white",             BTUI_BG_NORMAL},
     {"bg_normal",            BTUI_BG_NORMAL},
     {NULL,                   0}
+};
+
+static const luaL_Reg Rclass_metamethods[] =
+{
+    {"__tostring",      Lbtui_tostring},
+    {"enable",          Lbtui_enable},
+    {"disable",         Lbtui_disable},
+    {"withdisabled",    Lbtui_withdisabled},
+    {"getkey",          Lbtui_getkey},
+    {"print",           Lbtui_print},
+    {"clear",           Lbtui_clear},
+    {"flush",           Lbtui_flush},
+    {"move",            Lbtui_move},
+    {"withfg",          Lbtui_withfg},
+    {"withbg",          Lbtui_withbg},
+    {"withattributes",  Lbtui_withattributes},
+    {"setattributes",   Lbtui_setattributes},
+    {"unsetattributes", Lbtui_unsetattributes},
+    {"width",           Lbtui_width},
+    {"height",          Lbtui_height},
+    {NULL,              NULL}
 };
 
 LUALIB_API int luaopen_btui(lua_State *L)

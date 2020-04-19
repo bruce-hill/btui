@@ -22,7 +22,7 @@ int main(void)
 
         int mouse_x = -1, mouse_y = -1;
         int key = btui_getkey(bt, &mouse_x, &mouse_y);
-        btui_clear(bt);
+        btui_clear_screen(bt);
         switch (key) {
             case 'q': case KEY_CTRL_C: done = 1; break;
             case -1: break;

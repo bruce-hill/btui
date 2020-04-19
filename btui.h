@@ -38,10 +38,11 @@ int btui_set_bg_hex(btui_t *bt, int hex);
 #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
 #define btui_puts(bt, s) fputs(s, (bt)->out)
 #define btui_flush(bt) fflush((bt)->out)
-#define btui_clear(bt) fputs("\033[2J", (bt)->out)
 #define btui_clear_below(bt) fputs("\033[J", (bt)->out)
 #define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
-#define btui_clear_eol(bt) fputs("\033[K", (bt)->out)
+#define btui_clear_screen(bt) fputs("\033[2J", (bt)->out)
+#define btui_clear_right(bt) fputs("\033[K", (bt)->out)
+#define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
 #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
 
 static btui_t current_bt;

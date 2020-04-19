@@ -4,6 +4,14 @@ btui(function(bt)
     local key = nil
     local x, y = 0, 0
     while key ~= "q" and key ~= "Ctrl-c" do
+        if key == "?" then
+            bt:withdisabled(function()
+                io.write("OK? ")
+                io.flush()
+                io.read()
+            end)
+        end
+
         bt:clear()
         bt:move(x, y)
         bt:withbg(150,225,80, function()
@@ -11,7 +19,6 @@ btui(function(bt)
                 bt:print(" Pressed: ", key, " ")
             end)
         end)
-        if key == "e" then error("ERR MESSAGE") end
 
         local title = "Lua BTUI Demo"
         bt:withattributes("bold", "underline", function()
