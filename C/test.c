@@ -19,10 +19,16 @@ int main(void)
         btui_printf(bt, "%s", title);
         btui_set_attributes(bt, BTUI_NORMAL);
 
-        btui_set_attributes(bt, BTUI_FG_NORMAL | BTUI_FAINT);
+        btui_set_attributes(bt, BTUI_BOLD);
+        btui_move_cursor(bt, 0, bt->height-2);
+        btui_printf(bt, "Press 'q' to quit");
+        btui_set_attributes(bt, BTUI_NORMAL);
+
+        btui_set_attributes(bt, BTUI_FAINT);
         btui_move_cursor(bt, bt->width-16, bt->height-2);
         btui_printf(bt, "Size = %dx%d", bt->width, bt->height);
         btui_set_attributes(bt, BTUI_NORMAL);
+
         btui_flush(bt);
 
         int mouse_x = -1, mouse_y = -1;

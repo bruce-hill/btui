@@ -1,7 +1,7 @@
 import ctypes
 from contextlib import contextmanager
 
-__all__ = ['btui']
+__all__ = ['open_btui']
 
 # Load the shared library into c types.
 libbtui = ctypes.CDLL("./libbtui.so")
@@ -101,12 +101,6 @@ BTUI_INVERSE_ATTRS = {
 
 
 class BTUI:
-    def __enter__(self):
-        self.enable()
-
-    def __exit__(self, *exc):
-        self.disable()
-
     def enable(self):
         self._btui = libbtui.btui_enable()
 
@@ -231,4 +225,10 @@ class BTUI:
         libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
 
 
-btui = BTUI()
+_btui = BTUI()
+@contextmanager
+def open_btui():
+    _btui.enable()
+    try: yield _btui
+    finally: _btui.disable()
+

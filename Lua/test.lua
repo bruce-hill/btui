@@ -32,6 +32,11 @@ btui(function(bt)
             bt:write(title)
         end)
 
+        bt:withattributes("bold", function()
+            bt:move(0, bt:height()-1)
+            bt:write("Press 'q' to quit")
+        end)
+
         bt:withattributes("faint", function()
             local s = ("Size: (%dx%d)"):format(bt:width(), bt:height())
             bt:move(bt:width()-#s, bt:height()-1)
