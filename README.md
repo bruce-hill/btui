@@ -128,26 +128,26 @@ require("btui")(function(bt)
     ...
 end)
 
-bt:enable() -- Enables btui (if previously disabled)
-bt:disable() -- Disables btui
-bt:withdisabled(fn) -- Calls "fn" with btui disabled, then re-enables btui
-bt:getkey(timeout=-1) -- Returns a keypress (and optionally, mouse x and y coordinates). The optional timeout argument specifies how long, in tenths of a second, to wait for the next keypress.
-bt:write() -- Write text to the terminal
 bt:clear(type="screen") -- Clear the terminal. Options are: "screen", "right", "left", "above", "below", "line"
-bt:flush() -- Flush the terminal output. Most operations do this anyways.
-bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.
--- R,G,B values are in the range [0.0, 1.0]:
-bt:withfg(r,g,b, fn) -- Set the foreground color to (r,g,b), call fn, then reset the foreground color to default
-bt:withbg(r,g,b, fn) -- Set the background color to (r,g,b), call fn, then reset the background color to default
-bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
+bt:disable() -- Disables btui
+bt:enable() -- Enables btui (if previously disabled)
 bt:fillbox(x,y,w,h) -- Fill the given rectangle with space characters
-bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
-bt:withattributes(attrs..., fn) -- Set the given attributes, call fn, then unset them
-bt:setattributes(attrs...) -- Set the given attributes
-bt:unsetattributes(attrs...) -- Unset the given attributes
-bt:suspend() -- Suspend the current process and drop back into normal terminal mode
-bt:width() -- Return the scren width
+bt:flush() -- Flush the terminal output. Most operations do this anyways.
+bt:getkey(timeout=-1) -- Returns a keypress (and optionally, mouse x and y coordinates). The optional timeout argument specifies how long, in tenths of a second, to wait for the next keypress.
 bt:height() -- Return the screen height
+bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
+bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.
+bt:setattributes(attrs...) -- Set the given attributes
+bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
+bt:suspend() -- Suspend the current process and drop back into normal terminal mode
+bt:unsetattributes(attrs...) -- Unset the given attributes
+bt:width() -- Return the scren width
+bt:withattributes(attrs..., fn) -- Set the given attributes, call fn, then unset them
+-- R,G,B values are in the range [0.0, 1.0]:
+bt:withbg(r,g,b, fn) -- Set the background color to (r,g,b), call fn, then reset the background color to default
+bt:withdisabled(fn) -- Calls "fn" with btui disabled, then re-enables btui
+bt:withfg(r,g,b, fn) -- Set the foreground color to (r,g,b), call fn, then reset the foreground color to default
+bt:write() -- Write text to the terminal
 ```
 
 See [Lua/test.lua](Lua/test.lua) for example usage. Run `make lua` to build the
@@ -169,34 +169,34 @@ The returned object has the following methods:
 
 ```python
 class BTUI:
-    def enable(self):
+    @contextmanager
+    def attributes(self, *attrs):
+    @contextmanager
+    def bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def clear(self, mode='screen'):
     def disable(self):
     @contextmanager
     def disabled(self):
+    def draw_shadow(self, x, y, w, h):
+    def enable(self):
+    @contextmanager
+    def fg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def fill_box(self, x, y, w, h):
+    def flush(self):
     def getkey(self, timeout=None): # returns key, mouse_x, mouse_y
     @property
-    def width(self):
-    @property
     def height(self):
+    def move(self, x, y):
+    def outline_box(self, x, y, w, h):
+    def set_attributes(self, *attrs):
+    def set_bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def set_fg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def suspend(self):
+    def unset_attributes(self, *attrs):
+    @property
+    def width(self):
     def write(self, *args, sep=''):
     def write_bytes(self, b):
-    def move(self, x, y):
-    def flush(self):
-    def suspend(self):
-    def clear(self, mode='screen'):
-    def set_attributes(self, *attrs):
-    def unset_attributes(self, *attrs):
-    @contextmanager
-    def attributes(self, *attrs):
-    def set_fg(self, r, g, b):
-    def set_bg(self, r, g, b):
-    @contextmanager
-    def fg(self, r, g, b):
-    @contextmanager
-    def bg(self, r, g, b):
-    def outline_box(self, x, y, w, h):
-    def fill_box(self, x, y, w, h):
-    def draw_shadow(self, x, y, w, h):
 ```
 
 See [Python/test.py](Python/test.py) for example code, which can be run with
