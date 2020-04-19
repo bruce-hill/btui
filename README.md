@@ -10,6 +10,8 @@ keypresses, then this is the library for you!
 Note: Currently, BTUI is somewhere between 0.5% and 0.1% the size of ncurses,
 but even *counting the number of lines of code in ncurses* is hard.
 
+![BTUI screenshot](btui.png)
+
 ## Cleanup by Default
 
 Once BTUI is enabled, you can manually disable TUI Mode (e.g. if you want to
