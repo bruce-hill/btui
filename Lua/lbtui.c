@@ -66,7 +66,10 @@ static int Lbtui_getkey(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (*bt == NULL) luaL_error(L, "BTUI object not initialized");
     int mouse_x = -1, mouse_y = -1;
-    int key = btui_getkey(*bt, &mouse_x, &mouse_y);
+    int isnum = 1;
+    int timeout = lua_gettop(L) > 1 ? lua_tointegerx(L, 2, &isnum) : -1;
+    if (!isnum) luaL_argerror(L, 2, "timeout should be an integer");
+    int key = btui_getkey(*bt, timeout, &mouse_x, &mouse_y);
     if (key == -1) return 0;
     char buf[256] = {0};
     btui_keyname(key, buf);

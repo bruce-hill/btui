@@ -15,7 +15,7 @@ checksyntax: btui.h
 clean:
 	@cd Lua; make clean
 	@cd C; make clean
-	@cd python; make clean
+	@cd Python; make clean
 
 %: %.c btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $< -o $@

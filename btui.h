@@ -26,7 +26,7 @@ typedef struct {
 
 btui_t* btui_enable(void);
 void btui_disable(btui_t *bt);
-int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y);
+int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
 int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
@@ -158,6 +158,48 @@ static keyname_t key_names[] = {
     {':', "Colon"},
 };
 
+static const struct termios normal_termios = {
+    .c_iflag = ICRNL,
+    .c_oflag = OPOST | ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
+    .c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOE | ECHOK | ECHOCTL | ECHOKE,
+    .c_cflag = CS8 | CREAD,
+    .c_cc[VINTR] = '',
+    .c_cc[VQUIT] = '',
+    .c_cc[VERASE] = 127,
+    .c_cc[VKILL] = '',
+    .c_cc[VEOF] = '',
+    .c_cc[VSTART] = '',
+    .c_cc[VSTOP] = '',
+    .c_cc[VSUSP] = '',
+    .c_cc[VREPRINT] = '',
+    .c_cc[VWERASE] = '',
+    .c_cc[VLNEXT] = '',
+    .c_cc[VDISCARD] = '',
+    .c_cc[VMIN] = 1,
+    .c_cc[VTIME] = 0,
+};
+
+static struct termios tui_termios = {
+    .c_iflag = 0,
+    .c_oflag = ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
+    .c_lflag = ECHOE | ECHOK | ECHOCTL | ECHOKE,
+    .c_cflag = CS8 | CREAD,
+    .c_cc[VINTR] = '',
+    .c_cc[VQUIT] = '',
+    .c_cc[VERASE] = 127,
+    .c_cc[VKILL] = '',
+    .c_cc[VEOF] = '',
+    .c_cc[VSTART] = '',
+    .c_cc[VSTOP] = '',
+    .c_cc[VSUSP] = '',
+    .c_cc[VREPRINT] = '',
+    .c_cc[VWERASE] = '',
+    .c_cc[VLNEXT] = '',
+    .c_cc[VDISCARD] = '',
+    .c_cc[VMIN] = 1,
+    .c_cc[VTIME] = 0,
+};
+
 static inline int nextchar(int fd)
 {
     char c;
@@ -176,8 +218,16 @@ static inline int nextnum(int fd, int c, int *n)
  * If mouse_x or mouse_y are non-null and a mouse event occurs, they will be
  * set to the position of the mouse (0-indexed).
  */
-int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y)
+int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
 {
+    int new_vmin = timeout < 0 ? 1 : 0, new_vtime = timeout < 0 ? 0 : timeout;
+    if (new_vmin != tui_termios.c_cc[VMIN] || new_vtime != tui_termios.c_cc[VTIME]) {
+        tui_termios.c_cc[VMIN] = new_vmin;
+        tui_termios.c_cc[VTIME] = new_vtime;
+        if (tcsetattr(fileno(bt->out), TCSANOW, &tui_termios) == -1)
+            return -1;
+    }
+
     if (mouse_x) *mouse_x = -1;
     if (mouse_y) *mouse_y = -1;
     int fd = fileno(bt->in);
@@ -365,49 +415,6 @@ int btui_keynamed(const char *name)
     }
     return strlen(name) == 1 ? name[0] : -1;
 }
-
-
-static const struct termios normal_termios = {
-    .c_iflag = ICRNL,
-    .c_oflag = OPOST | ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
-    .c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOE | ECHOK | ECHOCTL | ECHOKE,
-    .c_cflag = CS8 | CREAD,
-    .c_cc[VINTR] = '',
-    .c_cc[VQUIT] = '',
-    .c_cc[VERASE] = 127,
-    .c_cc[VKILL] = '',
-    .c_cc[VEOF] = '',
-    .c_cc[VSTART] = '',
-    .c_cc[VSTOP] = '',
-    .c_cc[VSUSP] = '',
-    .c_cc[VREPRINT] = '',
-    .c_cc[VWERASE] = '',
-    .c_cc[VLNEXT] = '',
-    .c_cc[VDISCARD] = '',
-    .c_cc[VMIN] = 1,
-    .c_cc[VTIME] = 0,
-};
-
-static const struct termios tui_termios = {
-    .c_iflag = 0,
-    .c_oflag = ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
-    .c_lflag = ECHOE | ECHOK | ECHOCTL | ECHOKE,
-    .c_cflag = CS8 | CREAD,
-    .c_cc[VINTR] = '',
-    .c_cc[VQUIT] = '',
-    .c_cc[VERASE] = 127,
-    .c_cc[VKILL] = '',
-    .c_cc[VEOF] = '',
-    .c_cc[VSTART] = '',
-    .c_cc[VSTOP] = '',
-    .c_cc[VSUSP] = '',
-    .c_cc[VREPRINT] = '',
-    .c_cc[VWERASE] = '',
-    .c_cc[VLNEXT] = '',
-    .c_cc[VDISCARD] = '',
-    .c_cc[VMIN] = 1,
-    .c_cc[VTIME] = 0,
-};
 
 static void cleanup(void)
 {
