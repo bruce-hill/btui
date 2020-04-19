@@ -94,6 +94,49 @@ static int Lbtui_move(lua_State *L)
     return 0;
 }
 
+static int Lbtui_withfg(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
+    int isnum;
+    int r = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer r value");
+    int g = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer g value");
+    int b = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer b value");
+    btui_set_fg_rgb(*bt, r, g, b);
+    int top = lua_gettop(L);
+    int status = lua_pcall(L, 0, LUA_MULTRET, 0);
+    btui_set_attributes(*bt, BTUI_FG_NORMAL);
+    if (status != LUA_OK)
+        lua_error(L);
+    return lua_gettop(L) - top;
+}
+
+static int Lbtui_withbg(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
+    int isnum;
+    int r = lua_tointegerx(L, 2, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer r value");
+    int g = lua_tointegerx(L, 3, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer g value");
+    int b = lua_tointegerx(L, 4, &isnum);
+    if (!isnum) luaL_error(L, "Expected integer b value");
+    btui_set_bg_rgb(*bt, r, g, b);
+    int top = lua_gettop(L);
+    int status = lua_pcall(L, 0, LUA_MULTRET, 0);
+    btui_set_attributes(*bt, BTUI_BG_NORMAL);
+    if (status != LUA_OK)
+        lua_error(L);
+    return lua_gettop(L) - top;
+}
+
+
 static int Lbtui_width(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -141,6 +184,8 @@ static const luaL_Reg Rclass_metamethods[] =
     { "print",      Lbtui_print},
     { "clear",      Lbtui_clear},
     { "move",       Lbtui_move},
+    { "withfg",     Lbtui_withfg},
+    { "withbg",     Lbtui_withbg},
     { "width",      Lbtui_width},
     { "height",     Lbtui_height},
     { NULL,         NULL}

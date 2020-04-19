@@ -6,8 +6,19 @@ btui(function(bt)
     while key ~= "q" and key ~= "Ctrl-c" do
         bt:clear()
         bt:move(x, y)
-        bt:print("Pressed: ", key)
+        bt:withbg(150,225,80, function()
+            bt:withfg(0,0,0, function()
+                bt:print(" Pressed: ", key, " ")
+            end)
+        end)
         if key == "e" then error("ERR MESSAGE") end
+
+        local title = "Lua BTUI Demo"
+        bt:withfg(100,200,255, function()
+            bt:move(math.floor((bt:width()-#title)/2), 0)
+            bt:print(title)
+        end)
+
         local s = ("Size: (%dx%d)"):format(bt:width(), bt:height())
         bt:move(bt:width()-#s, bt:height()-1)
         bt:print(s)

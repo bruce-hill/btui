@@ -7,10 +7,16 @@ int main(void)
     if (!bt) return 1;
     int done = 0;
     int x = 0, y = 0;
-    int i = 0;
     while (!done) {
+        const char *title = "BTUI C Demo";
+        btui_set_attributes(bt, BTUI_FG_BLUE | BTUI_BOLD);
+        btui_move_cursor(bt, (bt->width - (int)strlen(title)) / 2, 0);
+        btui_printf(bt, "%s", title);
+
+        btui_set_attributes(bt, BTUI_FG_NORMAL | BTUI_FAINT);
         btui_move_cursor(bt, 0, bt->height-1);
-        btui_printf(bt, "Update %d, size = %dx%d", i++, bt->width, bt->height);
+        btui_printf(bt, "Size = %dx%d", bt->width, bt->height);
+        btui_set_attributes(bt, BTUI_NORMAL);
         btui_flush(bt);
 
         int mouse_x = -1, mouse_y = -1;
@@ -33,9 +39,9 @@ int main(void)
                 char buf[256] = {0};
                 btui_keyname(key, buf);
                 btui_move_cursor(bt, x, y);
-                //btui_set_attributes(bt, BTUI_FG_YELLOW | BTUI_BOLD);
-                btui_set_fg_hex(bt, 0xacff40);
-                btui_printf(bt, "Pressed: %s", buf);
+                btui_set_bg_hex(bt, 0xacff40);
+                btui_set_attributes(bt, BTUI_FG_BLACK);
+                btui_printf(bt, " Pressed: %s ", buf);
                 btui_set_attributes(bt, BTUI_NORMAL);
                 fflush(bt->out);
                 break;

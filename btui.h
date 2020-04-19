@@ -57,7 +57,7 @@ static btui_t current_bt;
 #define T_OFF(opt) "\033[?" opt "l"
 
 static const char *TUI_ENTER = T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
-static const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR);
+static const char *TUI_LEAVE =  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m";
 
 // Maximum time in milliseconds between double clicks
 #ifndef DOUBLECLICK_THRESHOLD
@@ -534,7 +534,7 @@ const unsigned long BTUI_FG_MAGENTA           = 1ul << 35;
 const unsigned long BTUI_FG_CYAN              = 1ul << 36;
 const unsigned long BTUI_FG_WHITE             = 1ul << 37;
 // 38: 256/24bit color
-const unsigned long BTUI_NO_FG                = 1ul << 39;
+const unsigned long BTUI_FG_NORMAL            = 1ul << 39;
 const unsigned long BTUI_BG_BLACK             = 1ul << 40;
 const unsigned long BTUI_BG_RED               = 1ul << 41;
 const unsigned long BTUI_BG_GREEN             = 1ul << 42;
@@ -544,7 +544,7 @@ const unsigned long BTUI_BG_MAGENTA           = 1ul << 45;
 const unsigned long BTUI_BG_CYAN              = 1ul << 46;
 const unsigned long BTUI_BG_WHITE             = 1ul << 47;
 // 48: 256/24bit color
-const unsigned long BTUI_NO_BG                = 1ul << 49;
+const unsigned long BTUI_BG_NORMAL            = 1ul << 49;
 const unsigned long BTUI_FRAMED               = 1ul << 51;
 const unsigned long BTUI_ENCIRCLED            = 1ul << 52;
 const unsigned long BTUI_OVERLINED            = 1ul << 53;
