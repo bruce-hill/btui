@@ -49,6 +49,27 @@ of time has passed after pressing it with no new bytes being sent. Most of this
 oddity is completely unavoidable, that's just the how terminals work. Escape
 key handling can be improved slightly by polling with zero timeout.
 
+## Tips and Tricks
+
+* For best performance, try to structure your program to take advantage of
+  terminal scrolling. It's much faster than redrawing every line on the screen.
+
+* Don't assume a string's length (in bytes) is the same as its width on the
+  screen. Unicode characters and terminal escape sequences violate this
+  assumption.
+
+* Don't clear the screen unless you need to. It causes a lot of unnecessary
+  redrawing.
+
+* A good pattern to follow is: draw things from left to right, clearing to
+  the right after each item. Then, once everything has been drawn, clear
+  to the bottom of the screen. If you follow this approach, you won't have
+  to worry too much about the screen width of the things you're writing.
+
+* Text wrapping must be done manually, since many terminals do not support
+  wrapping around to any point other than the first column, which is useless
+  for any TUI uses other than text on the far left of the screen.
+
 ## Language Bindings
 
 BTUI comes with bindings for C and Lua, with plans to add Python bindings.
@@ -79,6 +100,9 @@ constants, including terminal escape values and keycodes.
     #define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
     #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
     #define btui_suspend(bt) kill(getpid(), SIGTSTP)
+    void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+    void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+    void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
 
 See [C/test.c](C/test.c) for example usage.
 
@@ -105,6 +129,9 @@ before the error is printed. Here's a simple example program:
     -- R,G,B values are in the range [0.0, 1.0]:
     bt:withfg(r,g,b, fn) -- Set the foreground color to (r,g,b), call fn, then reset the foreground color to default
     bt:withbg(r,g,b, fn) -- Set the background color to (r,g,b), call fn, then reset the background color to default
+    bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
+    bt:fillbox(x,y,w,h) -- Fill the given rectangle with space characters
+    bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
     bt:withattributes(attrs..., fn) -- Set the given attributes, call fn, then unset them
     bt:setattributes(attrs...) -- Set the given attributes
     bt:unsetattributes(attrs...) -- Unset the given attributes
