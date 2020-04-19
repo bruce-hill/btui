@@ -13,7 +13,9 @@ int main(void)
         btui_printf(bt, "Update %d, size = %dx%d", i++, bt->width, bt->height);
         btui_flush(bt);
 
-        int key = btui_getkey(bt, NULL, NULL);
+        int mouse_x = -1, mouse_y = -1;
+        int key = btui_getkey(bt, &mouse_x, &mouse_y);
+        btui_clear(bt);
         switch (key) {
             case 'q': case KEY_CTRL_C: done = 1; break;
             case -1: break;
@@ -24,9 +26,13 @@ int main(void)
                 btui_scroll(bt, 1, bt->height-1, -1);
                 break;
             default: {
+                if (mouse_x != -1) {
+                    x = mouse_x;
+                    y = mouse_y;
+                }
                 char buf[256] = {0};
                 btui_keyname(key, buf);
-                btui_move_cursor(bt, x, y++);
+                btui_move_cursor(bt, x, y);
                 //btui_set_attributes(bt, BTUI_FG_YELLOW | BTUI_BOLD);
                 btui_set_fg_hex(bt, 0xacff40);
                 btui_printf(bt, "Pressed: %s", buf);

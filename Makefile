@@ -7,12 +7,29 @@ CWARN=-Wall -Wpedantic -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializ
 #CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 G=
 
-all: test
+all: checksyntax
+
+checksyntax: btui.h
+	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) -fsyntax-only $<
 
 clean:
-	rm -f test
+	@cd lua; make clean
+	@cd C; make clean
+	@cd python; make clean
 
 %: %.c btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $< -o $@
 
-.PHONY: all, clean
+c:
+	@cd C; make
+
+testc:
+	@cd C; make test
+
+lua:
+	@cd lua; make
+
+testlua:
+	@cd lua; make test
+
+.PHONY: all, checksyntax, clean, c, testc, lua, testlua

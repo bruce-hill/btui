@@ -24,8 +24,6 @@ typedef struct {
     int size_changed;
 } btui_t;
 
-static btui_t current_bt;
-
 btui_t* btui_enable(void);
 void btui_disable(btui_t *bt);
 int btui_getkey(btui_t *bt, int *mouse_x, int *mouse_y);
@@ -38,12 +36,15 @@ int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char 
 int btui_set_fg_hex(btui_t *bt, int hex);
 int btui_set_bg_hex(btui_t *bt, int hex);
 #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
+#define btui_puts(bt, s) fputs(s, (bt)->out)
 #define btui_flush(bt) fflush((bt)->out)
 #define btui_clear(bt) fputs("\033[2J", (bt)->out)
 #define btui_clear_below(bt) fputs("\033[J", (bt)->out)
 #define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
 #define btui_clear_eol(bt) fputs("\033[K", (bt)->out)
 #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
+
+static btui_t current_bt;
 
 // Terminal escape sequences:
 #define T_WRAP        "7"
@@ -129,9 +130,9 @@ static keyname_t key_names[] = {
     {KEY_ARROW_UP, "Up"}, {KEY_ARROW_DOWN, "Down"}, {KEY_ARROW_LEFT, "Left"}, {KEY_ARROW_RIGHT, "Right"},
     {MOUSE_LEFT_PRESS, "Left press"}, {MOUSE_RIGHT_PRESS, "Right press"}, {MOUSE_MIDDLE_PRESS, "Middle press"},
     {MOUSE_LEFT_DRAG, "Left drag"}, {MOUSE_RIGHT_DRAG, "Right drag"}, {MOUSE_MIDDLE_DRAG, "Middle drag"},
-    {MOUSE_LEFT_RELEASE, "Left click"}, {MOUSE_RIGHT_RELEASE, "Right click"}, {MOUSE_MIDDLE_RELEASE, "Middle click"},
-    {MOUSE_LEFT_RELEASE, "Left up"}, {MOUSE_RIGHT_RELEASE, "Right up"}, {MOUSE_MIDDLE_RELEASE, "Middle up"},
     {MOUSE_LEFT_RELEASE, "Left release"}, {MOUSE_RIGHT_RELEASE, "Right release"}, {MOUSE_MIDDLE_RELEASE, "Middle release"},
+    {MOUSE_LEFT_RELEASE, "Left up"}, {MOUSE_RIGHT_RELEASE, "Right up"}, {MOUSE_MIDDLE_RELEASE, "Middle up"},
+    {MOUSE_LEFT_RELEASE, "Left click"}, {MOUSE_RIGHT_RELEASE, "Right click"}, {MOUSE_MIDDLE_RELEASE, "Middle click"},
     {MOUSE_LEFT_DOUBLE, "Double left click"}, {MOUSE_RIGHT_DOUBLE, "Double right click"}, {MOUSE_MIDDLE_DOUBLE, "Double middle click"},
     {MOUSE_WHEEL_RELEASE, "Mouse wheel up"}, {MOUSE_WHEEL_PRESS, "Mouse wheel down"},
     {KEY_TAB, "Tab"}, {KEY_ENTER, "Enter"}, {KEY_ENTER, "Return"},
@@ -386,7 +387,7 @@ static const struct termios normal_termios = {
     .c_cc[VTIME] = 0,
 };
 
-const struct termios tui_termios = {
+static const struct termios tui_termios = {
     .c_iflag = 0,
     .c_oflag = ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
     .c_lflag = ECHOE | ECHOK | ECHOCTL | ECHOKE,
