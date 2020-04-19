@@ -41,6 +41,14 @@ then you'll have to implement it manually. The upside is that you're able to
 handle it gracefully and do whatever cleanup you want. If you want to provide
 `Ctrl-z` suspend functionality, you can use `btui_suspend(bt)`.
 
+Warning: xterm control sequences do not support all key combinations (e.g.
+`Ctrl-9`) and some key combinations map to the same control sequences (e.g.
+`Ctrl-m` and `Enter`, or `Ctrl-8` and `Backspace`). `Escape` in particular is a
+little bit odd, since it's only recognized as an escape keypress if some amount
+of time has passed after pressing it with no new bytes being sent. Most of this
+oddity is completely unavoidable, that's just the how terminals work. Escape
+key handling can be improved slightly by polling with zero timeout.
+
 ## Language Bindings
 
 BTUI comes with bindings for C and Lua, with plans to add Python bindings.
