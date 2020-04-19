@@ -82,7 +82,7 @@ static int Lbtui_getkey(lua_State *L)
     return 1;
 }
 
-static int Lbtui_print(lua_State *L)
+static int Lbtui_write(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
@@ -445,7 +445,7 @@ static const luaL_Reg Rclass_metamethods[] =
     {"disable",         Lbtui_disable},
     {"withdisabled",    Lbtui_withdisabled},
     {"getkey",          Lbtui_getkey},
-    {"print",           Lbtui_print},
+    {"write",           Lbtui_write},
     {"clear",           Lbtui_clear},
     {"flush",           Lbtui_flush},
     {"move",            Lbtui_move},

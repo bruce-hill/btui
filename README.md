@@ -131,7 +131,7 @@ before the error is printed. Here's a simple example program:
     bt:disable() -- Disables btui
     bt:withdisabled(fn) -- Calls "fn" with btui disabled, then re-enables btui
     bt:getkey(timeout=-1) -- Returns a keypress (and optionally, mouse x and y coordinates). The optional timeout argument specifies how long, in tenths of a second, to wait for the next keypress.
-    bt:print() -- Print text to the terminal
+    bt:write() -- Write text to the terminal
     bt:clear(type="screen") -- Clear the terminal. Options are: "screen", "right", "left", "above", "below", "line"
     bt:flush() -- Flush the terminal output. Most operations do this anyways.
     bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.

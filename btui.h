@@ -39,19 +39,19 @@ int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_fg_hex(btui_t *bt, int hex);
 int btui_set_bg_hex(btui_t *bt, int hex);
-#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
-#define btui_puts(bt, s) fputs(s, (bt)->out)
-#define btui_flush(bt) fflush((bt)->out)
+void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+int btui_puts(btui_t *bt, const char *s);
+int btui_flush(btui_t *bt);
+int btui_suspend(btui_t *bt);
 #define btui_clear_below(bt) fputs("\033[J", (bt)->out)
 #define btui_clear_above(bt) fputs("\033[1J", (bt)->out)
 #define btui_clear_screen(bt) fputs("\033[2J", (bt)->out)
 #define btui_clear_right(bt) fputs("\033[K", (bt)->out)
 #define btui_clear_left(bt) fputs("\033[1K", (bt)->out)
 #define btui_clear_line(bt) fputs("\033[2K", (bt)->out)
-#define btui_suspend(bt) kill(getpid(), SIGTSTP)
-void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-void btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
 
 static btui_t current_bt;
 
@@ -614,6 +614,7 @@ void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h)
     for (int i = 0; i < w; i++)
        fputc('q', bt->out);
     fputs("j\033(B", bt->out);
+    fflush(bt->out);
 }
 
 void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
@@ -626,6 +627,7 @@ void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
             fputc(' ', bt->out);
         }
     }
+    fflush(bt->out);
 }
 
 void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
@@ -640,6 +642,25 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
         fputc('a', bt->out);
     }
     fputs("\033(B", bt->out);
+    fflush(bt->out);
+}
+
+int btui_puts(btui_t *bt, const char *s)
+{
+    int ret = fputs(s, bt->out);
+    fflush(bt->out);
+    return ret;
+}
+
+int btui_flush(btui_t *bt)
+{
+    return fflush(bt->out);
+}
+
+int btui_suspend(btui_t *bt)
+{
+    (void)bt;
+    return kill(getpid(), SIGTSTP);
 }
 
 #endif
