@@ -24,13 +24,15 @@ typedef struct {
     int size_changed;
 } btui_t;
 
+typedef unsigned long long attr_t;
+
 btui_t* btui_enable(void);
 void btui_disable(btui_t *bt);
 int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
 int btui_move_cursor(btui_t *bt, int x, int y);
 char *btui_keyname(int key, char *buf);
 int btui_keynamed(const char *name);
-int btui_set_attributes(btui_t *bt, unsigned long long attrs);
+int btui_set_attributes(btui_t *bt, attr_t attrs);
 int btui_set_fg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_bg_rgb(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int btui_set_fg_hex(btui_t *bt, int hex);
@@ -514,7 +516,6 @@ int btui_set_bg_hex(btui_t *bt, int hex)
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
 }
 
-typedef unsigned long long attr_t;
 const attr_t BTUI_NORMAL               = 1ul << 0;
 const attr_t BTUI_BOLD                 = 1ul << 1;
 const attr_t BTUI_FAINT                = 1ul << 2;
@@ -558,7 +559,7 @@ const attr_t BTUI_FRAMED               = 1ul << 51;
 const attr_t BTUI_ENCIRCLED            = 1ul << 52;
 const attr_t BTUI_OVERLINED            = 1ul << 53;
 
-int btui_set_attributes(btui_t *bt, unsigned long long attrs)
+int btui_set_attributes(btui_t *bt, attr_t attrs)
 {
     int printed = fputs("\033[", bt->out);
     for (int i = 0; i < 64; i++) {
