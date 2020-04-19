@@ -13,7 +13,7 @@ checksyntax: btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) -fsyntax-only $<
 
 clean:
-	@cd lua; make clean
+	@cd Lua; make clean
 	@cd C; make clean
 	@cd python; make clean
 
@@ -27,9 +27,9 @@ testc:
 	@cd C; make test
 
 lua:
-	@cd lua; make
+	@cd Lua; make
 
 testlua:
-	@cd lua; make test
+	@cd Lua; make test
 
 .PHONY: all, checksyntax, clean, c, testc, lua, testlua
