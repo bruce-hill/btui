@@ -66,9 +66,7 @@ static int Lbtui_getkey(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (*bt == NULL) luaL_error(L, "BTUI object not initialized");
     int mouse_x = -1, mouse_y = -1;
-    int isnum = 1;
-    int timeout = lua_gettop(L) > 1 ? lua_tointegerx(L, 2, &isnum) : -1;
-    if (!isnum) luaL_argerror(L, 2, "timeout should be an integer");
+    int timeout = lua_gettop(L) <= 1 ? -1 : (int)luaL_checkinteger(L, 2);
     int key = btui_getkey(*bt, timeout, &mouse_x, &mouse_y);
     if (key == -1) return 0;
     char buf[256] = {0};
@@ -113,7 +111,8 @@ static int Lbtui_clear(lua_State *L)
     } else if (strcmp(cleartype, "line") == 0) {
         btui_clear(*bt, BTUI_CLEAR_LINE);
     } else {
-        luaL_argerror(L, 2, "unknown clear type");
+        lua_pushliteral(L, "unknown clear type");
+        lua_error(L);
     }
     btui_flush(*bt);
     return 0;
@@ -132,11 +131,8 @@ static int Lbtui_move(lua_State *L)
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (lua_gettop(L) < 3) luaL_error(L, "Expected x and y values");
-    int isnum;
-    int x = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer x value");
-    int y = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_error(L, "Expected integer y value");
+    int x = (int)luaL_checkinteger(L, 2);
+    int y = (int)luaL_checkinteger(L, 3);
     btui_move_cursor(*bt, x, y);
     btui_flush(*bt);
     return 0;
@@ -147,13 +143,9 @@ static int Lbtui_withfg(lua_State *L)
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
-    int isnum;
-    lua_Number r = lua_tonumberx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected number for red value");
-    lua_Number g = lua_tonumberx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected number for green value");
-    lua_Number b = lua_tonumberx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected number for blue value");
+    lua_Number r = luaL_checknumber(L, 2);
+    lua_Number g = luaL_checknumber(L, 3);
+    lua_Number b = luaL_checknumber(L, 4);
     btui_set_fg(*bt,
                 r < 0.0 ? 0 : (r > 1.0 ? 255 : (int)(255.0 * r)),
                 g < 0.0 ? 0 : (g > 1.0 ? 255 : (int)(255.0 * g)),
@@ -171,13 +163,9 @@ static int Lbtui_withbg(lua_State *L)
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     if (lua_gettop(L) < 5) luaL_error(L, "Expected r,g,b values and a function");
-    int isnum;
-    lua_Number r = lua_tonumberx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected number for red value");
-    lua_Number g = lua_tonumberx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected number for green value");
-    lua_Number b = lua_tonumberx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected number for blue value");
+    lua_Number r = luaL_checknumber(L, 2);
+    lua_Number g = luaL_checknumber(L, 3);
+    lua_Number b = luaL_checknumber(L, 4);
     btui_set_bg(*bt,
                 r < 0.0 ? 0 : (r > 1.0 ? 255 : (int)(255.0 * r)),
                 g < 0.0 ? 0 : (g > 1.0 ? 255 : (int)(255.0 * g)),
@@ -194,15 +182,10 @@ static int Lbtui_linebox(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    int isnum;
-    lua_Integer x = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
-    lua_Integer y = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
-    lua_Integer w = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
-    lua_Integer h = lua_tointegerx(L, 5, &isnum);
-    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    int x = (int)luaL_checkinteger(L, 2);
+    int y = (int)luaL_checkinteger(L, 3);
+    int w = (int)luaL_checkinteger(L, 4);
+    int h = (int)luaL_checkinteger(L, 5);
     btui_draw_linebox(*bt, x, y, w, h);
     return 0;
 }
@@ -211,15 +194,10 @@ static int Lbtui_fillbox(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    int isnum;
-    lua_Integer x = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
-    lua_Integer y = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
-    lua_Integer w = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
-    lua_Integer h = lua_tointegerx(L, 5, &isnum);
-    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    int x = (int)luaL_checkinteger(L, 2);
+    int y = (int)luaL_checkinteger(L, 3);
+    int w = (int)luaL_checkinteger(L, 4);
+    int h = (int)luaL_checkinteger(L, 5);
     btui_fill_box(*bt, x, y, w, h);
     return 0;
 }
@@ -228,15 +206,10 @@ static int Lbtui_shadow(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    int isnum;
-    lua_Integer x = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected integer for x value");
-    lua_Integer y = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected integer for y value");
-    lua_Integer w = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected integer for w value");
-    lua_Integer h = lua_tointegerx(L, 5, &isnum);
-    if (!isnum) luaL_argerror(L, 5, "expected integer for h value");
+    int x = (int)luaL_checkinteger(L, 2);
+    int y = (int)luaL_checkinteger(L, 3);
+    int w = (int)luaL_checkinteger(L, 4);
+    int h = (int)luaL_checkinteger(L, 5);
     btui_draw_shadow(*bt, x, y, w, h);
     return 0;
 }
@@ -245,13 +218,9 @@ static int Lbtui_scroll(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    int isnum;
-    lua_Integer firstline = lua_tointegerx(L, 2, &isnum);
-    if (!isnum) luaL_argerror(L, 2, "expected integer for first line");
-    lua_Integer lastline = lua_tointegerx(L, 3, &isnum);
-    if (!isnum) luaL_argerror(L, 3, "expected integer for last line");
-    lua_Integer scroll = lua_tointegerx(L, 4, &isnum);
-    if (!isnum) luaL_argerror(L, 4, "expected integer for scroll amount");
+    int firstline = (int)luaL_checkinteger(L, 2);
+    int lastline = (int)luaL_checkinteger(L, 3);
+    int scroll = (int)luaL_checkinteger(L, 4);
     btui_scroll(*bt, firstline, lastline, scroll);
     return 0;
 }
@@ -268,8 +237,10 @@ static int Lbtui_setattributes(lua_State *L)
     for (int i = 2; i <= top; i++) {
         lua_pushvalue(L, i);
         lua_gettable(L, attr_table);
-        if (lua_isnil(L, -1))
-            luaL_argerror(L, i, "invalid attribute");
+        if (lua_isnil(L, -1)) {
+            const char *a = lua_tostring(L, i);
+            luaL_error(L, "invalid attribute: %s", a);
+        }
         attrs |= (lua_Unsigned)lua_tointeger(L, -1);
     }
     btui_set_attributes(*bt, attrs);
@@ -288,8 +259,10 @@ static int Lbtui_unsetattributes(lua_State *L)
     for (int i = 2; i <= top; i++) {
         lua_pushvalue(L, i);
         lua_gettable(L, attr_table);
-        if (lua_isnil(L, -1))
-            luaL_argerror(L, i, "invalid attribute");
+        if (lua_isnil(L, -1)) {
+            const char *a = lua_tostring(L, i);
+            luaL_error(L, "invalid attribute: %s", a);
+        }
         attrs |= (lua_Unsigned)lua_tointeger(L, -1);
     }
     btui_set_attributes(*bt, attrs);
