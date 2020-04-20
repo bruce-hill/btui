@@ -13,8 +13,12 @@ LUA_DIR=/usr/local
 LUA_INC=$(LUA_DIR)/include
 LUA_BIN=$(LUA_DIR)/bin
 LUA= lua
-#LUA_SHARED_FLAGS=-bundle -undefined dynamic_lookup
-LUA_SHARED_FLAGS=-shared -fPIC
+LUA_O_FLAGS=-fPIC
+ifeq ($(shell uname -s),Darwin)
+	LUA_SHARED_FLAGS=-bundle -undefined dynamic_lookup
+else
+	LUA_SHARED_FLAGS=-shared -fPIC
+endif
 
 all: btui.so
 
@@ -28,6 +32,6 @@ btui.so: lbtui.o ../btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $(LUA_SHARED_FLAGS) -I$(LUA_INC) -o $@ $<
 
 lbtui.o: lbtui.c
-	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) -fPIC -c -o $@ $<
+	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $(LUA_O_FLAGS) -c -o $@ $<
 
 .PHONY: all, clean, testlua, test
