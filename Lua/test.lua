@@ -22,12 +22,14 @@ btui(function(bt)
             bt:write("Pressed: ", key)
         end)
 
-        bt:withattributes("bg_blue", "fg_black", function()
-            local title = "Lua BTUI Demo"
-            local w = #title
-            local center = math.floor((bt:width() - w) / 2)
-            bt:fillbox(center-2, 0, w+4, 3)
+        local title = "Lua BTUI Demo"
+        local w = #title
+        local center = math.floor((bt:width() - w) / 2)
+        bt:withattributes("fg_blue", "bg_normal", function()
             bt:shadow(center-2, 0, w+4, 3)
+        end)
+        bt:withattributes("bg_blue", "fg_black", function()
+            bt:fillbox(center-2, 0, w+4, 3)
             bt:move(center, 1)
             bt:write(title)
         end)

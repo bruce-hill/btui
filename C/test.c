@@ -9,11 +9,14 @@ int main(void)
     int x = 1, y = 1;
     while (!done) {
         const char *title = "BTUI C Demo";
-        btui_set_attributes(bt, BTUI_BG_BLUE | BTUI_FG_BLACK);
         int w = (int)strlen(title);
         int center = (bt->width - w) / 2;
-        btui_fill_box(bt, center-2, 0, w+4, 3);
+
+        btui_set_attributes(bt, BTUI_FG_BLUE | BTUI_BG_NORMAL);
         btui_draw_shadow(bt, center-2, 0, w+4, 3);
+
+        btui_set_attributes(bt, BTUI_BG_BLUE | BTUI_FG_BLACK);
+        btui_fill_box(bt, center-2, 0, w+4, 3);
 
         btui_move_cursor(bt, center, 1);
         btui_printf(bt, "%s", title);

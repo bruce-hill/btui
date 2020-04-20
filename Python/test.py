@@ -17,12 +17,13 @@ with open_btui() as bt:
             bt.move(x, y)
             bt.write(f"Pressed: {key}")
 
-        with bt.attributes("bg_blue", "fg_black"):
-            title = "Python bt Demo"
-            w = len(title)
-            center = (bt.width - w) // 2
-            bt.fill_box(center - 2, 0, w + 4, 3)
+        title = "Python BTUI Demo"
+        w = len(title)
+        center = (bt.width - w) // 2
+        with bt.attributes("fg_blue", "bg_normal"):
             bt.draw_shadow(center - 2, 0, w + 4, 3)
+        with bt.attributes("bg_blue", "fg_black"):
+            bt.fill_box(center - 2, 0, w + 4, 3)
             bt.move(center, 1)
             bt.write(title)
 
