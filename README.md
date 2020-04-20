@@ -133,6 +133,7 @@ bt:getkey(timeout=-1) -- Returns a keypress (and optionally, mouse x and y coord
 bt:height() -- Return the screen height
 bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
 bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.
+bt:scroll(firstline, lastline, amount) -- Scroll the given screen region by the given amount.
 bt:setattributes(attrs...) -- Set the given attributes
 bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
 bt:suspend() -- Suspend the current process and drop back into normal terminal mode
@@ -179,11 +180,12 @@ class BTUI:
     def fg(self, r, g, b): # R,G,B values are [0.0, 1.0]
     def fill_box(self, x, y, w, h):
     def flush(self):
-    def getkey(self, timeout=None): # returns key, mouse_x, mouse_y
+    def getkey(self, timeout=None):
     @property
     def height(self):
     def move(self, x, y):
     def outline_box(self, x, y, w, h):
+    def scroll(self, firstline, lastline=None, amount=None):
     def set_attributes(self, *attrs):
     def set_bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
     def set_fg(self, r, g, b): # R,G,B values are [0.0, 1.0]

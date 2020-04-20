@@ -102,8 +102,24 @@ BTUI_INVERSE_ATTRS = {
 
 
 class BTUI:
-    def enable(self):
-        self._btui = libbtui.btui_enable()
+    @contextmanager
+    def attributes(self, *attrs):
+        self.set_attributes(*attrs)
+        try: yield
+        finally: self.unset_attributes(*attrs)
+
+    @contextmanager
+    def bg(self, r, g, b):
+        self.set_bg(r, g, b)
+        try: yield
+        finally: self.set_attributes("bg_normal")
+
+    def clear(self, mode='screen'):
+        assert self._btui
+        if mode not in ('screen', 'above', 'below', 'line', 'left', 'right'):
+            raise ArgumentError("Not a supported clear type: "+repr(mode))
+        clr = ctypes.c_uint.in_dll(libbtui, 'BTUI_CLEAR_' + mode.upper())
+        libbtui.btui_clear(self._btui, clr)
 
     def disable(self):
         libbtui.btui_disable(self._btui)
@@ -113,6 +129,27 @@ class BTUI:
         self.disable()
         try: yield self
         finally: self.enable()
+
+    def draw_shadow(self, x, y, w, h):
+        assert self._btui
+        libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
+
+    def enable(self):
+        self._btui = libbtui.btui_enable()
+
+    @contextmanager
+    def fg(self, r, g, b):
+        self.set_fg(r, g, b)
+        try: yield
+        finally: self.set_attributes("fg_normal")
+
+    def fill_box(self, x, y, w, h):
+        assert self._btui
+        libbtui.btui_fill_box(self._btui, int(x), int(y), int(w), int(h))
+
+    def flush(self):
+        assert self._btui
+        libbtui.btui_flush(self._btui)
 
     def getkey(self, timeout=None):
         assert self._btui
@@ -128,14 +165,55 @@ class BTUI:
             return buf.value.decode('utf8'), mouse_x.value, mouse_y.value
 
     @property
-    def width(self):
-        assert self._btui
-        return self._btui.contents.width
-
-    @property
     def height(self):
         assert self._btui
         return self._btui.contents.height
+
+    def move(self, x, y):
+        assert self._btui
+        libbtui.btui_move_cursor(self._btui, int(x), int(y))
+
+    def outline_box(self, x, y, w, h):
+        assert self._btui
+        libbtui.btui_draw_linebox(self._btui, int(x), int(y), int(w), int(h))
+
+    def scroll(self, firstline, lastline=None, amount=None):
+        assert self._btui
+        if amount is None:
+            amount = firstline
+            firstline, lastline = 1, self.height
+        libbtui.btui_scroll(self._btui, firstline, lastline, amount)
+
+    def set_attributes(self, *attrs):
+        assert self._btui
+        attr_long = ctypes.c_longlong(0)
+        for a in attrs:
+            attr_long.value |= BTUI_ATTRS[a].value
+        libbtui.btui_set_attributes(self._btui, attr_long)
+
+    def set_bg(self, r, g, b):
+        assert self._btui
+        libbtui.btui_set_bg(self._btui, int(r*255), int(g*255), int(b*255))
+
+    def set_fg(self, r, g, b):
+        assert self._btui
+        libbtui.btui_set_fg(self._btui, int(r*255), int(g*255), int(b*255))
+
+    def suspend(self):
+        assert self._btui
+        libbtui.btui_suspend(self._btui)
+
+    def unset_attributes(self, *attrs):
+        assert self._btui
+        attr_long = ctypes.c_longlong(0)
+        for a in attrs:
+            attr_long.value |= BTUI_INVERSE_ATTRS[a].value
+        libbtui.btui_set_attributes(self._btui, attr_long)
+
+    @property
+    def width(self):
+        assert self._btui
+        return self._btui.contents.width
 
     def write(self, *args, sep=''):
         assert self._btui
@@ -145,84 +223,6 @@ class BTUI:
     def write_bytes(self, b):
         assert self._btui
         libbtui.btui_puts(self._btui, b)
-
-    def move(self, x, y):
-        assert self._btui
-        libbtui.btui_move_cursor(self._btui, int(x), int(y))
-
-    def scroll(self, firstline, lastline=None, amount=None):
-        assert self._btui
-        if amount is None:
-            amount = firstline
-            firstline, lastline = 1, self.height
-        libbtui.btui_scroll(self._btui, firstline, lastline, amount)
-
-    def flush(self):
-        assert self._btui
-        libbtui.btui_flush(self._btui)
-
-    def suspend(self):
-        assert self._btui
-        libbtui.btui_suspend(self._btui)
-
-    def clear(self, mode='screen'):
-        assert self._btui
-        if mode not in ('screen', 'above', 'below', 'line', 'left', 'right'):
-            raise ArgumentError("Not a supported clear type: "+repr(mode))
-        clr = ctypes.c_uint.in_dll(libbtui, 'BTUI_CLEAR_' + mode.upper())
-        libbtui.btui_clear(self._btui, clr)
-
-    def set_attributes(self, *attrs):
-        assert self._btui
-        attr_long = ctypes.c_longlong(0)
-        for a in attrs:
-            attr_long.value |= BTUI_ATTRS[a].value
-        libbtui.btui_set_attributes(self._btui, attr_long)
-
-    def unset_attributes(self, *attrs):
-        assert self._btui
-        attr_long = ctypes.c_longlong(0)
-        for a in attrs:
-            attr_long.value |= BTUI_INVERSE_ATTRS[a].value
-        libbtui.btui_set_attributes(self._btui, attr_long)
-
-    @contextmanager
-    def attributes(self, *attrs):
-        self.set_attributes(*attrs)
-        try: yield
-        finally: self.unset_attributes(*attrs)
-
-    def set_fg(self, r, g, b):
-        assert self._btui
-        libbtui.btui_set_fg(self._btui, int(r*255), int(g*255), int(b*255))
-
-    def set_bg(self, r, g, b):
-        assert self._btui
-        libbtui.btui_set_bg(self._btui, int(r*255), int(g*255), int(b*255))
-
-    @contextmanager
-    def fg(self, r, g, b):
-        self.set_fg(r, g, b)
-        try: yield
-        finally: self.set_attributes("fg_normal")
-
-    @contextmanager
-    def bg(self, r, g, b):
-        self.set_bg(r, g, b)
-        try: yield
-        finally: self.set_attributes("bg_normal")
-
-    def outline_box(self, x, y, w, h):
-        assert self._btui
-        libbtui.btui_draw_linebox(self._btui, int(x), int(y), int(w), int(h))
-
-    def fill_box(self, x, y, w, h):
-        assert self._btui
-        libbtui.btui_fill_box(self._btui, int(x), int(y), int(w), int(h))
-
-    def draw_shadow(self, x, y, w, h):
-        assert self._btui
-        libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
 
 
 _btui = BTUI()
