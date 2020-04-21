@@ -111,12 +111,14 @@ const attr_t BTUI_BLINK_FAST           = 1ul << 6;
 const attr_t BTUI_REVERSE              = 1ul << 7;
 const attr_t BTUI_CONCEAL              = 1ul << 8;
 const attr_t BTUI_STRIKETHROUGH        = 1ul << 9;
+// 10-19: alternative fonts
 const attr_t BTUI_FRAKTUR              = 1ul << 20;
 const attr_t BTUI_DOUBLE_UNDERLINE     = 1ul << 21;
 const attr_t BTUI_NO_BOLD_OR_FAINT     = 1ul << 22;
 const attr_t BTUI_NO_ITALIC_OR_FRAKTUR = 1ul << 23;
 const attr_t BTUI_NO_UNDERLINE         = 1ul << 24;
 const attr_t BTUI_NO_BLINK             = 1ul << 25;
+// 26: reserved
 const attr_t BTUI_NO_REVERSE           = 1ul << 27;
 const attr_t BTUI_NO_CONCEAL           = 1ul << 28;
 const attr_t BTUI_NO_STRIKETHROUGH     = 1ul << 29;
@@ -140,9 +142,14 @@ const attr_t BTUI_BG_CYAN              = 1ul << 46;
 const attr_t BTUI_BG_WHITE             = 1ul << 47;
 // 48: 256/24bit color
 const attr_t BTUI_BG_NORMAL            = 1ul << 49;
+// 50: Inverse of 26 (reserved)
 const attr_t BTUI_FRAMED               = 1ul << 51;
 const attr_t BTUI_ENCIRCLED            = 1ul << 52;
 const attr_t BTUI_OVERLINED            = 1ul << 53;
+const attr_t BTUI_NO_FRAMED_OR_ENCIRCLED = 1ul << 54;
+const attr_t BTUI_NO_OVERLINED        = 1ul << 55;
+// 56-59: reserved
+// 60-65: Ideogram stuff
 
 
 // BTUI object:

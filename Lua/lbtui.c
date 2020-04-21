@@ -423,6 +423,9 @@ static struct {
     {"bg_cyan",              BTUI_BG_NORMAL},
     {"bg_white",             BTUI_BG_NORMAL},
     {"bg_normal",            BTUI_BG_NORMAL},
+    {"framed",               BTUI_NO_FRAMED_OR_ENCIRCLED},
+    {"encircled",            BTUI_NO_FRAMED_OR_ENCIRCLED},
+    {"overlined",            BTUI_NO_OVERLINED},
     {NULL,                   0}
 };
 

@@ -98,7 +98,10 @@ BTUI_INVERSE_ATTRS = {
     "bg_cyan":              attr('BTUI_BG_NORMAL'),
     "bg_white":             attr('BTUI_BG_NORMAL'),
     "bg_normal":            attr('BTUI_BG_NORMAL'),
-};
+    "framed":               attr('BTUI_NO_FRAMED_OR_ENCIRCLED'),
+    "encircled":            attr('BTUI_NO_FRAMED_OR_ENCIRCLED'),
+    "overlined":            attr('BTUI_NO_OVERLINED'),
+}
 
 
 class BTUI:
