@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+#
+# bed - the BTUI editor
+#
+# This is a simple example program demonstrating a minimal text editor
+# implemented with the Python BTUI bindings.
+#
+# Usage: ./bed.py [-d|--debug] <file>
+# You can move around with arrow keys, PgUp/PgDn and make basic file edits.
+# Save with Ctrl-S, Quit with Ctrl-Q or Ctrl-C
+#
 import sys
 from btui import open_btui
 from collections import namedtuple
