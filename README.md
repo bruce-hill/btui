@@ -10,8 +10,9 @@ buffering, then this is the library for you!
 
 ![BTUI screenshot](btui.png)
 
-Note: Currently, BTUI is somewhere between 0.5% and 0.1% the size of ncurses,
-but even *counting the number of lines of code in ncurses* is hard.
+Note: Currently, BTUI is around 0.5% the size of ncurses, but some margin for
+growth is reserved for supporting additional features and constant
+declarations.
 
 ## Cleanup by Default
 
@@ -94,6 +95,7 @@ constants, including terminal escape values and keycodes.
     void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
     int     btui_flush(btui_t *bt);
     int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
+    int     btui_hide_cursor(btui_t *bt);
     char    *btui_keyname(int key, char *buf);
     int     btui_keynamed(const char *name);
     int     btui_move_cursor(btui_t *bt, int x, int y);
@@ -105,6 +107,7 @@ constants, including terminal escape values and keycodes.
     int     btui_set_bg_hex(btui_t *bt, int hex);
     int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
     int     btui_set_fg_hex(btui_t *bt, int hex);
+    int     btui_show_cursor(btui_t *bt);
     int     btui_suspend(btui_t *bt);
 
 See [C/test.c](C/test.c) and [C/rainbow.c](C/rainbow.c) for example usage. You
@@ -131,11 +134,13 @@ bt:fillbox(x,y,w,h) -- Fill the given rectangle with space characters
 bt:flush() -- Flush the terminal output. Most operations do this anyways.
 bt:getkey(timeout=-1) -- Returns a keypress (and optionally, mouse x and y coordinates). The optional timeout argument specifies how long, in tenths of a second, to wait for the next keypress.
 bt:height() -- Return the screen height
+bt:hidecursor() -- Hide the cursor
 bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
 bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.
 bt:scroll(firstline, lastline, amount) -- Scroll the given screen region by the given amount.
 bt:setattributes(attrs...) -- Set the given attributes
 bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
+bt:showcursor() -- Show the cursor
 bt:suspend() -- Suspend the current process and drop back into normal terminal mode
 bt:unsetattributes(attrs...) -- Unset the given attributes
 bt:width() -- Return the scren width
@@ -183,12 +188,14 @@ class BTUI:
     def getkey(self, timeout=None):
     @property
     def height(self):
+    def hide_cursor(self):
     def move(self, x, y):
     def outline_box(self, x, y, w, h):
     def scroll(self, firstline, lastline=None, amount=None):
     def set_attributes(self, *attrs):
     def set_bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
     def set_fg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def show_cursor(self):
     def suspend(self):
     def unset_attributes(self, *attrs):
     @property

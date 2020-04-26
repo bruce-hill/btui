@@ -18,7 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BTUI_VERSION 2
+#define BTUI_VERSION 3
 
 // Terminal escape sequences:
 #define T_WRAP        "7"
@@ -29,12 +29,12 @@
 #define T_ALT_SCREEN  "1049"
 #define T_ON(opt)  "\033[?" opt "h"
 #define T_OFF(opt) "\033[?" opt "l"
-#define TUI_ENTER T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR)
-#define TUI_LEAVE  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m"
+#define BTUI_ENTER T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR)
+#define BTUI_LEAVE  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m"
 
 // Maximum time in milliseconds between double clicks
-#ifndef DOUBLECLICK_THRESHOLD
-#define DOUBLECLICK_THRESHOLD 200
+#ifndef BTUI_DOUBLECLICK_THRESHOLD
+#define BTUI_DOUBLECLICK_THRESHOLD 200
 #endif
 
 // Keyboard modifiers:
@@ -175,6 +175,7 @@ btui_t* btui_enable(void);
 void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
 int     btui_flush(btui_t *bt);
 int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
+int     btui_hide_cursor(btui_t *bt);
 char    *btui_keyname(int key, char *buf);
 int     btui_keynamed(const char *name);
 int     btui_move_cursor(btui_t *bt, int x, int y);
@@ -186,6 +187,7 @@ int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char 
 int     btui_set_bg_hex(btui_t *bt, int hex);
 int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int     btui_set_fg_hex(btui_t *bt, int hex);
+int     btui_show_cursor(btui_t *bt);
 int     btui_suspend(btui_t *bt);
 
 
@@ -276,44 +278,64 @@ static struct termios tui_termios = {
 };
 
 // File-local functions:
-// Helper method for btui_getkey()
+
+/* 
+ * Read and return the next character from the file descriptor, or -1 if no
+ * character is available. (Helper method for nextnum() and btui_getkey())
+ */
 static inline int nextchar(int fd)
 {
     char c;
     return read(fd, &c, 1) == 1 ? c : -1;
 }
 
-// Helper method for btui_getkey()
-static inline int nextnum(int fd, int c, int *n)
+/*
+ * Given a file descriptor, parse an integer value, updating *c to hold the
+ * next character after the integer value. Return the parsed integer value.
+ * (Helper method for btui_getkey())
+ */
+static inline int nextnum(int fd, int *c)
 {
-    for (*n = 0; '0' <= c && c <= '9'; c = nextchar(fd))
-        *n = 10*(*n) + (c - '0');
-    return c;
+    int n;
+    *c = nextchar(fd);
+    for (n = 0; '0' <= *c && *c <= '9'; *c = nextchar(fd))
+        n = 10*n + (*c - '0');
+    return n;
 }
 
-static void cleanup(void)
+/*
+ * Reset the terminal back to its normal state.
+ */
+static void btui_cleanup(void)
 {
     if (!current_bt.out) return;
     tcsetattr(fileno(current_bt.out), TCSANOW, &normal_termios);
-    fputs(TUI_LEAVE, current_bt.out);
+    fputs(BTUI_LEAVE, current_bt.out);
     fflush(current_bt.out);
 }
 
-static void cleanup_and_raise(int sig)
+/*
+ * Reset the terminal back to its normal state and raise the given signal.
+ * (This is used as a signal handler that gracefully exits without gunking up
+ * the terminal)
+ */
+static void btui_cleanup_and_raise(int sig)
 {
-    cleanup();
+    btui_cleanup();
     raise(sig);
     // This code will only ever be run if sig is SIGTSTP/SIGSTOP, otherwise, raise() won't return:
     btui_enable();
-    struct sigaction sa = {.sa_handler = &cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
+    struct sigaction sa = {.sa_handler = &btui_cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
     sigaction(sig, &sa, NULL);
 }
 
+/*
+ * A signal handler used to update BTUI's internal window size values when a
+ * SIGWINCH event occurs.
+ */
 static void update_term_size(int sig)
 {
     (void)sig;
-//struct winsize winsize = {0};
-//int winsize_changed = 0;
     struct winsize winsize;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &winsize);
     if (winsize.ws_col != current_bt.width || winsize.ws_row != current_bt.height) {
@@ -324,6 +346,11 @@ static void update_term_size(int sig)
 }
 
 // Public API functions:
+
+/*
+ * Clear all or part of the screen. `mode` should be one of:
+ *   BTUI_CLEAR_(BELOW|ABOVE|SCREEN|RIGHT|LEFT|LINE)
+ */
 int btui_clear(btui_t *bt, int mode)
 {
     switch (mode) {
@@ -337,12 +364,20 @@ int btui_clear(btui_t *bt, int mode)
     }
 }
 
+/*
+ * Disable TUI mode (return to the normal terminal with the normal terminal
+ * input handling).
+ */
 void btui_disable(btui_t *bt)
 {
     (void)bt;
-    cleanup();
+    btui_cleanup();
 }
 
+/*
+ * Draw a box using the special box-drawing characters at the given x,y
+ * position with the given width,height.
+ */
 void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h)
 {
     btui_move_cursor(bt, x-1, y-1);
@@ -367,6 +402,9 @@ void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h)
     fflush(bt->out);
 }
 
+/*
+ * Draw a shadow to the bottom right of the given box coordinates.
+ */
 void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
 {
     fputs("\033(0", bt->out);
@@ -382,6 +420,10 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
     fflush(bt->out);
 }
 
+/*
+ * Enable TUI mode for this terminal and return a pointer to the BTUI struct
+ * that should be passed to future API calls.
+ */
 btui_t *btui_enable(void)
 {
     char *tty_name = ttyname(STDIN_FILENO);
@@ -398,23 +440,27 @@ btui_t *btui_enable(void)
 
     current_bt.in = in;
     current_bt.out = out;
-    atexit(cleanup);
+    atexit(btui_cleanup);
 
     struct sigaction sa_winch = {.sa_handler = &update_term_size};
     sigaction(SIGWINCH, &sa_winch, NULL);
     int signals[] = {SIGTERM, SIGINT, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGSEGV, SIGTSTP};
-    struct sigaction sa = {.sa_handler = &cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
+    struct sigaction sa = {.sa_handler = &btui_cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
     for (size_t i = 0; i < sizeof(signals)/sizeof(signals[0]); i++)
         sigaction(signals[i], &sa, NULL);
 
     update_term_size(SIGWINCH);
     current_bt.size_changed = 0;
 
-    fputs(TUI_ENTER, out);
+    fputs(BTUI_ENTER, out);
     fflush(out);
     return &current_bt;
 }
 
+/*
+ * Fill the given rectangular area (x,y coordinates and width,height) with
+ * spaces.
+ */
 void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
 {
     int left = x, bottom = y + h;
@@ -428,6 +474,9 @@ void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
     fflush(bt->out);
 }
 
+/*
+ * Flush BTUI's output.
+ */
 int btui_flush(btui_t *bt)
 {
     return fflush(bt->out);
@@ -516,12 +565,11 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
             }
             return -1;
         case '<': { // Mouse clicks
-            int buttons = 0, x = 0, y = 0;
-            c = nextnum(fd, nextchar(fd), &buttons);
+            int buttons = nextnum(fd, &c);
             if (c != ';') return -1;
-            c = nextnum(fd, nextchar(fd), &x);
+            int x = nextnum(fd, &c);
             if (c != ';') return -1;
-            c = nextnum(fd, nextchar(fd), &y);
+            int y = nextnum(fd, &c);
             if (c != 'm' && c != 'M') return -1;
 
             if (mouse_x) *mouse_x = x - 1;
@@ -550,7 +598,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
                 if (key == lastclick) {
                     double dt_ms = 1e3*(double)(clicktime.tv_sec - lastclicktime.tv_sec)
                         + 1e-6*(double)(clicktime.tv_nsec - lastclicktime.tv_nsec);
-                    if (dt_ms < DOUBLECLICK_THRESHOLD) {
+                    if (dt_ms < BTUI_DOUBLECLICK_THRESHOLD) {
                         switch (key) {
                             case MOUSE_LEFT_RELEASE: key = MOUSE_LEFT_DOUBLE; break;
                             case MOUSE_RIGHT_RELEASE: key = MOUSE_RIGHT_DOUBLE; break;
@@ -566,9 +614,10 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
         default:
             if ('0' <= c && c <= '9') {
                 // Ps prefix
-                c = nextnum(fd, c, &numcode);
+                for (numcode = 0; '0' <= c && c <= '9'; c = nextchar(fd))
+                    numcode = 10*numcode + (c - '0');
                 if (c == ';') {
-                    c = nextnum(fd, nextchar(fd), &modifiers);
+                    modifiers = nextnum(fd, &c);
                     modifiers = (modifiers >> 1) << MOD_BITSHIFT;
                 }
                 goto CSI_start;
@@ -636,11 +685,25 @@ int btui_keynamed(const char *name)
     return strlen(name) == 1 ? name[0] : -1;
 }
 
+/*
+ * Move the terminal's cursor to the given x,y coordinates.
+ */
 int btui_move_cursor(btui_t *bt, int x, int y)
 {
     return fprintf(bt->out, "\033[%d;%dH", y+1, x+1);
 }
 
+/*
+ * Hide the terminal cursor.
+ */
+int btui_hide_cursor(btui_t *bt)
+{
+    return fputs(T_OFF(T_SHOW_CURSOR), bt->out);
+}
+
+/*
+ * Output a string to the terminal.
+ */
 int btui_puts(btui_t *bt, const char *s)
 {
     int ret = fputs(s, bt->out);
@@ -648,6 +711,10 @@ int btui_puts(btui_t *bt, const char *s)
     return ret;
 }
 
+/*
+ * Scroll the given screen region by the given amount. This is much faster than
+ * redrawing many lines.
+ */
 int btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount)
 {
     if (scroll_amount > 0) {
@@ -660,6 +727,9 @@ int btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount)
     return 0;
 }
 
+/*
+ * Set the given text attributes on the terminal output.
+ */
 int btui_set_attributes(btui_t *bt, attr_t attrs)
 {
     int printed = fputs("\033[", bt->out);
@@ -676,28 +746,53 @@ int btui_set_attributes(btui_t *bt, attr_t attrs)
     return printed;
 }
 
+/*
+ * Set the terminal text background color to the given RGB value.
+ */
 int btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm", r, g, b);
 }
 
+/*
+ * Set the terminal text background color to the given hexidecimal value.
+ */
 int btui_set_bg_hex(btui_t *bt, int hex)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm",
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
 }
 
+/*
+ * Set the terminal text foreground color to the given RGB value.
+ */
 int btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b)
 {
     return fprintf(bt->out, "\033[38;2;%d;%d;%dm", r, g, b);
 }
 
+/*
+ * Set the terminal text foreground color to the given hexidecimal value.
+ */
 int btui_set_fg_hex(btui_t *bt, int hex)
 {
     return fprintf(bt->out, "\033[38;2;%d;%d;%dm",
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
 }
 
+/*
+ * Show the terminal cursor.
+ */
+int btui_show_cursor(btui_t *bt)
+{
+    return fputs(T_ON(T_SHOW_CURSOR), bt->out);
+}
+
+/*
+ * Suspend the current application. This will leave TUI mode and typically drop
+ * to the console. Normally, this would be caused by Ctrl-z, but BTUI
+ * intercepts Ctrl-z and requires you to handle it manually.
+ */
 int btui_suspend(btui_t *bt)
 {
     (void)bt;

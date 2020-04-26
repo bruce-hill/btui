@@ -126,6 +126,22 @@ static int Lbtui_flush(lua_State *L)
     return 0;
 }
 
+static int Lbtui_hidecursor(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    btui_hide_cursor(*bt);
+    return 0;
+}
+
+static int Lbtui_showcursor(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    btui_show_cursor(*bt);
+    return 0;
+}
+
 static int Lbtui_move(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -432,26 +448,28 @@ static struct {
 static const luaL_Reg Rclass_metamethods[] =
 {
     {"__tostring",      Lbtui_tostring},
-    {"enable",          Lbtui_enable},
-    {"disable",         Lbtui_disable},
-    {"withdisabled",    Lbtui_withdisabled},
-    {"getkey",          Lbtui_getkey},
-    {"write",           Lbtui_write},
     {"clear",           Lbtui_clear},
-    {"flush",           Lbtui_flush},
-    {"move",            Lbtui_move},
-    {"withfg",          Lbtui_withfg},
-    {"withbg",          Lbtui_withbg},
-    {"withattributes",  Lbtui_withattributes},
-    {"setattributes",   Lbtui_setattributes},
-    {"unsetattributes", Lbtui_unsetattributes},
-    {"suspend",         Lbtui_suspend},
-    {"linebox",         Lbtui_linebox},
+    {"disable",         Lbtui_disable},
+    {"enable",          Lbtui_enable},
     {"fillbox",         Lbtui_fillbox},
-    {"scroll",          Lbtui_scroll},
-    {"shadow",          Lbtui_shadow},
-    {"width",           Lbtui_width},
+    {"flush",           Lbtui_flush},
+    {"getkey",          Lbtui_getkey},
     {"height",          Lbtui_height},
+    {"hidecursor",      Lbtui_hidecursor},
+    {"linebox",         Lbtui_linebox},
+    {"move",            Lbtui_move},
+    {"scroll",          Lbtui_scroll},
+    {"setattributes",   Lbtui_setattributes},
+    {"shadow",          Lbtui_shadow},
+    {"showcursor",      Lbtui_showcursor},
+    {"suspend",         Lbtui_suspend},
+    {"unsetattributes", Lbtui_unsetattributes},
+    {"width",           Lbtui_width},
+    {"withattributes",  Lbtui_withattributes},
+    {"withbg",          Lbtui_withbg},
+    {"withdisabled",    Lbtui_withdisabled},
+    {"withfg",          Lbtui_withfg},
+    {"write",           Lbtui_write},
     {NULL,              NULL}
 };
 

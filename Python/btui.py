@@ -176,6 +176,14 @@ class BTUI:
         assert self._btui
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
 
+    def hide_cursor(self):
+        assert self._btui
+        libbtui.btui_hide_cursor(self._btui)
+
+    def show_cursor(self):
+        assert self._btui
+        libbtui.btui_show_cursor(self._btui)
+
     def outline_box(self, x, y, w, h):
         assert self._btui
         libbtui.btui_draw_linebox(self._btui, int(x), int(y), int(w), int(h))
