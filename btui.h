@@ -68,6 +68,15 @@ typedef enum {
     MOUSE_WHEEL_RELEASE, MOUSE_WHEEL_PRESS,
 } btui_key_t;
 
+typedef int cursor_t;
+const cursor_t CURSOR_DEFAULT            = 0;
+const cursor_t CURSOR_BLINKING_BLOCK     = 1;
+const cursor_t CURSOR_STEADY_BLOCK       = 2;
+const cursor_t CURSOR_BLINKING_UNDERLINE = 3;
+const cursor_t CURSOR_STEADY_UNDERLINE   = 4;
+const cursor_t CURSOR_BLINKING_BAR       = 5;
+const cursor_t CURSOR_STEADY_BAR         = 6;
+
 // Overlapping key codes:
 #define KEY_CTRL_BACKTICK  KEY_CTRL_AT
 #define KEY_CTRL_2         KEY_CTRL_AT
@@ -185,6 +194,7 @@ int     btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount);
 int     btui_set_attributes(btui_t *bt, attr_t attrs);
 int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int     btui_set_bg_hex(btui_t *bt, int hex);
+int     btui_set_cursor(btui_t *bt, cursor_t cur);
 int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int     btui_set_fg_hex(btui_t *bt, int hex);
 int     btui_show_cursor(btui_t *bt);
@@ -310,6 +320,7 @@ static void btui_cleanup(void)
 {
     if (!current_bt.out) return;
     tcsetattr(fileno(current_bt.out), TCSANOW, &normal_termios);
+    btui_set_cursor(&current_bt, CURSOR_DEFAULT);
     fputs(BTUI_LEAVE, current_bt.out);
     fflush(current_bt.out);
 }
@@ -757,6 +768,14 @@ int btui_set_bg_hex(btui_t *bt, int hex)
 {
     return fprintf(bt->out, "\033[48;2;%d;%d;%dm",
                    (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+}
+
+/*
+ * Set the cursor shape.
+ */
+int btui_set_cursor(btui_t *bt, cursor_t cur)
+{
+    return fprintf(bt->out, "\033[%d q", cur);
 }
 
 /*

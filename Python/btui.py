@@ -180,6 +180,15 @@ class BTUI:
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
         libbtui.btui_flush(self._btui)
 
+    def set_cursor(self, cursor_type="default"):
+        assert self._btui
+        if cursor_type in ('default', 'blinking block', 'blinking underline', 'blinking bar'):
+            c = ctypes.c_uint.in_dll(libbtui, 'CURSOR_' + cursor_type.replace(' ', '_').upper())
+        elif cursor_type in ('block', 'underline', 'bar'):
+            c = ctypes.c_uint.in_dll(libbtui, 'CURSOR_STEADY_' + cursor_type.upper())
+        libbtui.btui_set_cursor(self._btui, c)
+        libbtui.btui_flush(self._btui)
+
     def hide_cursor(self):
         assert self._btui
         libbtui.btui_hide_cursor(self._btui)

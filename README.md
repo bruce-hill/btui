@@ -87,28 +87,31 @@ BTUI comes with bindings for C, Python, and Lua.
 BTUI has the following C function definitions, as well as definitions for some
 constants, including terminal escape values and keycodes.
 
-    int     btui_clear(btui_t *bt, int mode);
-    void    btui_disable(btui_t *bt);
-    void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
-    void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
-    btui_t* btui_enable(void);
-    void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
-    int     btui_flush(btui_t *bt);
-    int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
-    int     btui_hide_cursor(btui_t *bt);
-    char    *btui_keyname(int key, char *buf);
-    int     btui_keynamed(const char *name);
-    int     btui_move_cursor(btui_t *bt, int x, int y);
-    #define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
-    int     btui_puts(btui_t *bt, const char *s);
-    int     btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount);
-    int     btui_set_attributes(btui_t *bt, attr_t attrs);
-    int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int     btui_set_bg_hex(btui_t *bt, int hex);
-    int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
-    int     btui_set_fg_hex(btui_t *bt, int hex);
-    int     btui_show_cursor(btui_t *bt);
-    int     btui_suspend(btui_t *bt);
+```c
+int     btui_clear(btui_t *bt, int mode);
+void    btui_disable(btui_t *bt);
+void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
+void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
+btui_t* btui_enable(void);
+void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
+int     btui_flush(btui_t *bt);
+int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
+int     btui_hide_cursor(btui_t *bt);
+char    *btui_keyname(int key, char *buf);
+int     btui_keynamed(const char *name);
+int     btui_move_cursor(btui_t *bt, int x, int y);
+#define btui_printf(bt, ...) fprintf((bt)->out, __VA_ARGS__)
+int     btui_puts(btui_t *bt, const char *s);
+int     btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount);
+int     btui_set_attributes(btui_t *bt, attr_t attrs);
+int     btui_set_bg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int     btui_set_bg_hex(btui_t *bt, int hex);
+int     btui_set_cursor(btui_t *bt, cursor_t cur);
+int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
+int     btui_set_fg_hex(btui_t *bt, int hex);
+int     btui_show_cursor(btui_t *bt);
+int     btui_suspend(btui_t *bt);
+```
 
 See [C/test.c](C/test.c) and [C/rainbow.c](C/rainbow.c) for example usage. You
 can run `make testc` to run the C test demo and `make rainbow` to run the
@@ -139,6 +142,7 @@ bt:linebox(x,y,w,h) -- Draw an outlined box around the given rectangle
 bt:move(x, y) -- Move the cursor to the given position. (0,0) is the top left corner.
 bt:scroll(firstline, lastline, amount) -- Scroll the given screen region by the given amount.
 bt:setattributes(attrs...) -- Set the given attributes
+bt:setcursor(type) -- Set the cursor type
 bt:shadow(x,y,w,h) -- Draw a shaded shadow to the bottom right of the given rectangle
 bt:showcursor() -- Show the cursor
 bt:suspend() -- Suspend the current process and drop back into normal terminal mode
@@ -194,6 +198,7 @@ class BTUI:
     def scroll(self, firstline, lastline=None, amount=None):
     def set_attributes(self, *attrs):
     def set_bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    def set_cursor(self, cursor_type="default"):
     def set_fg(self, r, g, b): # R,G,B values are [0.0, 1.0]
     def show_cursor(self):
     def suspend(self):

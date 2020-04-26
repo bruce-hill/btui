@@ -156,6 +156,33 @@ static int Lbtui_move(lua_State *L)
     return 0;
 }
 
+static int Lbtui_setcursor(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    const char *cursortype = luaL_optlstring(L, 2, "default", NULL);
+    if (strcmp(cursortype, "default") == 0) {
+        btui_set_cursor(*bt, CURSOR_DEFAULT);
+    } else if (strcmp(cursortype, "blinking block") == 0) {
+        btui_set_cursor(*bt, CURSOR_BLINKING_BLOCK);
+    } else if (strcmp(cursortype, "block") == 0) {
+        btui_set_cursor(*bt, CURSOR_STEADY_BLOCK);
+    } else if (strcmp(cursortype, "blinking underline") == 0) {
+        btui_set_cursor(*bt, CURSOR_BLINKING_UNDERLINE);
+    } else if (strcmp(cursortype, "underline") == 0) {
+        btui_set_cursor(*bt, CURSOR_STEADY_UNDERLINE);
+    } else if (strcmp(cursortype, "blinking bar") == 0) {
+        btui_set_cursor(*bt, CURSOR_BLINKING_BAR);
+    } else if (strcmp(cursortype, "bar") == 0) {
+        btui_set_cursor(*bt, CURSOR_STEADY_BAR);
+    } else {
+        lua_pushliteral(L, "unknown cursor type");
+        lua_error(L);
+    }
+    btui_flush(*bt);
+    return 0;
+}
+
 static int Lbtui_withfg(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
@@ -467,6 +494,7 @@ static const luaL_Reg Rclass_metamethods[] =
     {"move",            Lbtui_move},
     {"scroll",          Lbtui_scroll},
     {"setattributes",   Lbtui_setattributes},
+    {"setcursor",       Lbtui_setcursor},
     {"shadow",          Lbtui_shadow},
     {"showcursor",      Lbtui_showcursor},
     {"suspend",         Lbtui_suspend},
