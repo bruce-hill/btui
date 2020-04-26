@@ -13,7 +13,7 @@ G=
 all: ctest rainbow
 
 clean:
-	rm -f test
+	rm -f ctest rainbow
 
 ctest: test.c ../btui.h
 	$(CC) $(CFLAGS) $(CWARN) $(G) $(O) $< -o $@
