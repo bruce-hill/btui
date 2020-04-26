@@ -1,4 +1,6 @@
 import ctypes
+import time
+import functools
 from contextlib import contextmanager
 
 __all__ = ['open_btui']
@@ -253,10 +255,33 @@ class BTUI:
         libbtui.btui_puts(self._btui, b)
         libbtui.btui_flush(self._btui)
 
+def delay(fn):
+    @functools.wraps(fn)
+    def wrapped(self, *a, **k):
+        assert self._btui
+        ret = fn(self, *a, **k)
+        time.sleep(self.delay)
+        libbtui.btui_show_cursor(self._btui)
+        return ret
+    return wrapped
 
-_btui = BTUI()
+class DebugBTUI(BTUI):
+    delay = 0.05
+
+for fn_name in ('clear', 'draw_shadow', 'fill_box', 'move', 'set_cursor', 'hide_cursor', 'show_cursor', 'outline_box',
+                'scroll', 'set_attributes', 'set_bg', 'set_fg', 'unset_attributes', 'write_bytes'):
+    setattr(DebugBTUI, fn_name, delay(getattr(BTUI, fn_name)))
+
+_btui = None
 @contextmanager
-def open_btui():
+def open_btui(*, debug=False, delay=0.05):
+    global _btui
+    if not _btui:
+        if debug:
+            _btui = DebugBTUI()
+            _btui.delay = delay
+        else:
+            _btui = BTUI()
     _btui.enable()
     _btui.move(0, 0)
     try: yield _btui
