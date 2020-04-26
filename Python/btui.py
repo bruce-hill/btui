@@ -208,7 +208,7 @@ class BTUI:
         assert self._btui
         if amount is None:
             amount = firstline
-            firstline, lastline = 1, self.height
+            firstline, lastline = 0, self.height-1
         libbtui.btui_scroll(self._btui, firstline, lastline, amount)
         libbtui.btui_flush(self._btui)
 
