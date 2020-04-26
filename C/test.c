@@ -1,3 +1,7 @@
+/*
+ * This file contains a basic example of BTUI C API usage.
+ */
+
 #include <stdio.h>
 #include "btui.h"
 

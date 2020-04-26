@@ -1,3 +1,7 @@
+/*
+ * This file contains the source of a program used to demonstrate BTUI's 24-bit
+ * color support by printing a rapidfire rainbow.
+ */
 #include <stdio.h>
 #include <math.h>
 #include "btui.h"

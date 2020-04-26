@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+#
+# This file contains a simple test program for demonstrating some basic Python
+# BTUI usage.
+#
 from btui import open_btui
 
 with open_btui() as bt:

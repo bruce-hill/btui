@@ -1,3 +1,7 @@
+#!/usr/bin/env lua
+--
+-- This file contains a basic example of BTUI Lua usage.
+--
 local btui = require("btui")
 
 btui(function(bt)
