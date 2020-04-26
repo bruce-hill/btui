@@ -399,7 +399,6 @@ void btui_draw_linebox(btui_t *bt, int x, int y, int w, int h)
     for (int i = 0; i < w; i++)
        fputc('q', bt->out);
     fputs("j\033(B", bt->out);
-    fflush(bt->out);
 }
 
 /*
@@ -417,7 +416,6 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
         fputc('a', bt->out);
     }
     fputs("\033(B", bt->out);
-    fflush(bt->out);
 }
 
 /*
@@ -471,7 +469,6 @@ void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
             fputc(' ', bt->out);
         }
     }
-    fflush(bt->out);
 }
 
 /*
@@ -707,7 +704,6 @@ int btui_hide_cursor(btui_t *bt)
 int btui_puts(btui_t *bt, const char *s)
 {
     int ret = fputs(s, bt->out);
-    fflush(bt->out);
     return ret;
 }
 

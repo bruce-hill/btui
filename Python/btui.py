@@ -123,6 +123,7 @@ class BTUI:
             raise ArgumentError("Not a supported clear type: "+repr(mode))
         clr = ctypes.c_uint.in_dll(libbtui, 'BTUI_CLEAR_' + mode.upper())
         libbtui.btui_clear(self._btui, clr)
+        libbtui.btui_flush(self._btui)
 
     def disable(self):
         libbtui.btui_disable(self._btui)
@@ -136,6 +137,7 @@ class BTUI:
     def draw_shadow(self, x, y, w, h):
         assert self._btui
         libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
+        libbtui.btui_flush(self._btui)
 
     def enable(self):
         self._btui = libbtui.btui_enable()
@@ -149,6 +151,7 @@ class BTUI:
     def fill_box(self, x, y, w, h):
         assert self._btui
         libbtui.btui_fill_box(self._btui, int(x), int(y), int(w), int(h))
+        libbtui.btui_flush(self._btui)
 
     def flush(self):
         assert self._btui
@@ -179,14 +182,17 @@ class BTUI:
     def hide_cursor(self):
         assert self._btui
         libbtui.btui_hide_cursor(self._btui)
+        libbtui.btui_flush(self._btui)
 
     def show_cursor(self):
         assert self._btui
         libbtui.btui_show_cursor(self._btui)
+        libbtui.btui_flush(self._btui)
 
     def outline_box(self, x, y, w, h):
         assert self._btui
         libbtui.btui_draw_linebox(self._btui, int(x), int(y), int(w), int(h))
+        libbtui.btui_flush(self._btui)
 
     def scroll(self, firstline, lastline=None, amount=None):
         assert self._btui
@@ -194,6 +200,7 @@ class BTUI:
             amount = firstline
             firstline, lastline = 1, self.height
         libbtui.btui_scroll(self._btui, firstline, lastline, amount)
+        libbtui.btui_flush(self._btui)
 
     def set_attributes(self, *attrs):
         assert self._btui
@@ -234,6 +241,7 @@ class BTUI:
     def write_bytes(self, b):
         assert self._btui
         libbtui.btui_puts(self._btui, b)
+        libbtui.btui_flush(self._btui)
 
 
 _btui = BTUI()

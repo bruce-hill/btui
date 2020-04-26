@@ -25,7 +25,6 @@ static int Lbtui_enable(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     *bt = btui_enable();
     btui_move_cursor(*bt, 0, 0);
-    btui_flush(*bt);
     return 0;
 }
 
@@ -131,6 +130,7 @@ static int Lbtui_hidecursor(lua_State *L)
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     btui_hide_cursor(*bt);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -139,6 +139,7 @@ static int Lbtui_showcursor(lua_State *L)
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     btui_show_cursor(*bt);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -150,7 +151,6 @@ static int Lbtui_move(lua_State *L)
     int x = (int)luaL_checkinteger(L, 2);
     int y = (int)luaL_checkinteger(L, 3);
     btui_move_cursor(*bt, x, y);
-    btui_flush(*bt);
     return 0;
 }
 
@@ -203,6 +203,7 @@ static int Lbtui_linebox(lua_State *L)
     int w = (int)luaL_checkinteger(L, 4);
     int h = (int)luaL_checkinteger(L, 5);
     btui_draw_linebox(*bt, x, y, w, h);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -215,6 +216,7 @@ static int Lbtui_fillbox(lua_State *L)
     int w = (int)luaL_checkinteger(L, 4);
     int h = (int)luaL_checkinteger(L, 5);
     btui_fill_box(*bt, x, y, w, h);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -227,6 +229,7 @@ static int Lbtui_shadow(lua_State *L)
     int w = (int)luaL_checkinteger(L, 4);
     int h = (int)luaL_checkinteger(L, 5);
     btui_draw_shadow(*bt, x, y, w, h);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -238,6 +241,7 @@ static int Lbtui_scroll(lua_State *L)
     int lastline = (int)luaL_checkinteger(L, 3);
     int scroll = (int)luaL_checkinteger(L, 4);
     btui_scroll(*bt, firstline, lastline, scroll);
+    btui_flush(*bt);
     return 0;
 }
 
