@@ -87,7 +87,7 @@ class BedFile:
                 line.extend(self.lines.pop(self.cursor.y+1))
                 self.drawn &= {d for d in self.drawn if d < self.cursor.y or d >= len(self.lines)+1}
                 self.unsaved = True
-            elif i < len(line)-1:
+            elif i < len(line):
                 del line[i:i+1]
                 self.drawn.discard(self.cursor.y)
                 self.unsaved = True
