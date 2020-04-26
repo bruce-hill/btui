@@ -25,6 +25,7 @@ static int Lbtui_enable(lua_State *L)
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
     *bt = btui_enable();
     btui_move_cursor(*bt, 0, 0);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -151,6 +152,7 @@ static int Lbtui_move(lua_State *L)
     int x = (int)luaL_checkinteger(L, 2);
     int y = (int)luaL_checkinteger(L, 3);
     btui_move_cursor(*bt, x, y);
+    btui_flush(*bt);
     return 0;
 }
 
@@ -345,6 +347,7 @@ static int Lbtui_wrap(lua_State *L)
     lua_setmetatable(L, -2);
     *bt = btui_enable();
     btui_move_cursor(*bt, 0, 0);
+    btui_flush(*bt);
     int status = lua_pcall(L, 1, 0, 0);
     btui_disable(*bt);
     if (status != LUA_OK)

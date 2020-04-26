@@ -178,6 +178,7 @@ class BTUI:
     def move(self, x, y):
         assert self._btui
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
+        libbtui.btui_flush(self._btui)
 
     def hide_cursor(self):
         assert self._btui
@@ -248,6 +249,7 @@ _btui = BTUI()
 @contextmanager
 def open_btui():
     _btui.enable()
+    _btui.move(0, 0)
     try: yield _btui
     finally: _btui.disable()
 
