@@ -726,10 +726,10 @@ int btui_scroll(btui_t *bt, int firstline, int lastline, int scroll_amount)
 {
     if (scroll_amount > 0) {
         return fprintf(bt->out, "\033[%d;%dr\033[%dS\033[r",
-                       firstline, lastline, scroll_amount);
+                       firstline+1, lastline+1, scroll_amount);
     } else if (scroll_amount < 0) {
         return fprintf(bt->out, "\033[%d;%dr\033[%dT\033[r",
-                       firstline, lastline, -scroll_amount);
+                       firstline+1, lastline+1, -scroll_amount);
     }
     return 0;
 }
