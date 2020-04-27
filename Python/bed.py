@@ -114,6 +114,8 @@ class BedFile:
             self.drawn &= {d for d in self.drawn if d < self.cursor.y or d >= len(self.lines)}
             self.cursor = Vec2(0, self.cursor.y + 1)
             self.unsaved = True
+        elif key == 'Left release':
+            self.cursor = Vec2(mx-(self.numlen + 1), my - 1 + self.scroll)
         elif key and (len(key) == 1 or key == '    '):
             line = self.lines[self.cursor.y]
             i = self.cursor.x
