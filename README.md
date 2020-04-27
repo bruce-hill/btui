@@ -6,7 +6,8 @@ the size of ncurses, while also providing a better API for the programmer who
 is not afraid to roll up their sleeves and manage their own state. If you want
 a drop-in TUI library that lets you switch into TUI mode, write some strings to
 the screen with 24-bit color, and get user keypresses in real-time without line
-buffering, then this is the library for you!
+buffering, then this is the library for you! BTUI also has language bindings for
+both [Lua](#markdown-header-lua-api) and [Python](#markdown-header-python-api).
 
 ![BTUI screenshot](btui.png)
 
