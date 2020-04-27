@@ -210,10 +210,14 @@ class BTUI:
 ```
 
 See [Python/test.py](Python/test.py) for example code, which can be run with
-`make testpython`. Also, see [Python/bed.py](Python/bed.py), which is a BTUI
-editor in around 200 lines of code. It's fairly performant and it showcases a
-nontrivial example program using BTUI. Usage: `./bed.py <file>` (must be run
-locally).
+`make testpython`.
+
+![BTUI bed screenshot](Python/bed.png)
+
+BTUI also comes with a demo text editor program, bed (BTUI Editor), at
+[Python/bed.py](Python/bed.py) in around 200 lines of code. It's fairly
+performant and it showcases a nontrivial example program using BTUI. Usage:
+`./bed.py <file>` (must be run locally).
 
 The Python API also allows you to run BTUI in "debug" mode
 `btui.open_btui(debug=True)`, which simply adds a timer delay (default: 50ms)
