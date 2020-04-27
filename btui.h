@@ -156,7 +156,7 @@ const attr_t BTUI_FRAMED               = 1ul << 51;
 const attr_t BTUI_ENCIRCLED            = 1ul << 52;
 const attr_t BTUI_OVERLINED            = 1ul << 53;
 const attr_t BTUI_NO_FRAMED_OR_ENCIRCLED = 1ul << 54;
-const attr_t BTUI_NO_OVERLINED        = 1ul << 55;
+const attr_t BTUI_NO_OVERLINED         = 1ul << 55;
 // 56-59: reserved
 // 60-65: Ideogram stuff
 
