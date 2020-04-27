@@ -116,6 +116,10 @@ class BedFile:
             self.unsaved = True
         elif key == 'Left release':
             self.cursor = Vec2(mx-(self.numlen + 1), my - 1 + self.scroll)
+        elif key == 'Mouse wheel down':
+            self.set_scroll(self.scroll + 3)
+        elif key == 'Mouse wheel up':
+            self.set_scroll(self.scroll - 3)
         elif key and (len(key) == 1 or key == '    '):
             line = self.lines[self.cursor.y]
             i = self.cursor.x
@@ -210,10 +214,11 @@ class BED:
         self.file.render()
 
         # Just redraw this every time:
-        with self.bt.attributes("faint"):
+        with self.bt.attributes("bold"):
             self.bt.move(0, self.bt.height-1)
             self.bt.write("Ctrl-Q to quit, Ctrl-S to save")
             self.bt.clear('right')
+        with self.bt.attributes("faint"):
             s = f"Line {self.file.cursor.y}, Col {self.file.cursor.x}, {self.renders} redraws"
             self.bt.move(self.bt.width-len(s), self.bt.height-1)
             self.bt.write(s)
