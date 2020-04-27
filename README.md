@@ -215,7 +215,7 @@ See [Python/test.py](Python/test.py) for example code, which can be run with
 ![BTUI bed screenshot](Python/bed.png)
 
 BTUI also comes with a demo text editor program, bed (BTUI Editor), at
-[Python/bed.py](Python/bed.py) in around 200 lines of code. It's fairly
+[Python/bed.py](Python/bed.py) (around 200 lines of code). It's fairly
 performant and it showcases a nontrivial example program using BTUI. Usage:
 `./bed.py <file>` (must be run locally).
 
