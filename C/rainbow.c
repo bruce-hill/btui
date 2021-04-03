@@ -16,12 +16,9 @@ int main(void)
     double dt = 0.1;
     char buf[1<<20];
     setvbuf(bt->out, buf, _IOFBF, sizeof(buf));
+    btui_puts(bt, T_OFF(T_WRAP));
+    const char *title = " 24 BIT COLOR SUPPORT! ";
     while (!done) {
-        btui_scroll(bt, 1, bt->height, +1);
-        const char *msg = " 24 BIT COLOR SUPPORT! ";
-        btui_move_cursor(bt, (bt->width - (int)strlen(msg)) / 2, 0);
-        btui_set_attributes(bt, BTUI_NORMAL | BTUI_BOLD);
-        btui_puts(bt, msg);
         int y = bt->height-1;
         btui_move_cursor(bt, 0, y);
         for (int x = 0; x < bt->width; x++) {
@@ -34,6 +31,10 @@ int main(void)
                         (b < 0 ? 0 : (b > 255 ? 255 : b)));
             btui_puts(bt, " ");
         }
+        btui_puts(bt, "\n");
+        btui_move_cursor(bt, (bt->width - (int)strlen(title)) / 2, 0);
+        btui_set_attributes(bt, BTUI_NORMAL | BTUI_BOLD);
+        btui_puts(bt, title);
         btui_flush(bt);
         usleep(10000);
         t += dt;
