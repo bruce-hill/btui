@@ -183,6 +183,7 @@ void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
 btui_t* btui_enable(void);
 void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
 int     btui_flush(btui_t *bt);
+void    btui_force_close(btui_t *bt);
 int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);
 int     btui_hide_cursor(btui_t *bt);
 char    *btui_keyname(int key, char *buf);
@@ -202,7 +203,7 @@ int     btui_suspend(btui_t *bt);
 
 
 // File-local variables:
-static btui_t current_bt;
+static btui_t current_bt = {.in = NULL, .out = NULL};
 
 // The names of keys that don't render well:
 static keyname_t key_names[] = {
@@ -323,6 +324,9 @@ static void btui_cleanup(void)
     btui_set_cursor(&current_bt, CURSOR_DEFAULT);
     fputs(BTUI_LEAVE, current_bt.out);
     fflush(current_bt.out);
+    fclose(current_bt.in);
+    fclose(current_bt.out);
+    memset(&current_bt, 0, sizeof(btui_t));
 }
 
 /*
@@ -439,7 +443,10 @@ btui_t *btui_enable(void)
     FILE *in = fopen(tty_name, "r");
     if (!in) return NULL;
     FILE *out = fopen(tty_name, "w");
-    if (!out) return NULL;
+    if (!out) {
+        fclose(in);
+        return NULL;
+    }
 
     if (tcsetattr(fileno(out), TCSANOW, &tui_termios) == -1) {
         fclose(in);
@@ -488,6 +495,17 @@ void btui_fill_box(btui_t *bt, int x, int y, int w, int h)
 int btui_flush(btui_t *bt)
 {
     return fflush(bt->out);
+}
+
+/*
+ * Close BTUI files and prevent cleaning up (useful for fork/exec)
+ */
+void btui_force_close(btui_t *bt)
+{
+    if (!bt->out) return;
+    fclose(bt->in);
+    fclose(bt->out);
+    memset(bt, 0, sizeof(btui_t));
 }
 
 /*
@@ -547,6 +565,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
         case 'Q': return numcode == 1 ? (modifiers | KEY_F2) : -1;
         case 'R': return numcode == 1 ? (modifiers | KEY_F3) : -1;
         case 'S': return numcode == 1 ? (modifiers | KEY_F4) : -1;
+        case 'Z': return MOD_SHIFT | modifiers | KEY_TAB;
         case '~':
             switch (numcode) {
                 case 1: return modifiers | KEY_HOME;
