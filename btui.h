@@ -9,14 +9,18 @@
 #ifndef FILE__BTUI_H
 #define FILE__BTUI_H
 
+#include <unistd.h>
+
+#define TTYDEFCHARS 1
+#include <termios.h>
+#undef TTYDEFCHARS
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <termios.h>
 #include <time.h>
-#include <unistd.h>
 
 #define BTUI_VERSION 4
 
@@ -245,47 +249,19 @@ static keyname_t key_names[] = {
 };
 
 // This is the default termios for normal terminal behavior:
-static const struct termios normal_termios = {
-    .c_iflag = ICRNL,
-    .c_oflag = OPOST | ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
-    .c_lflag = ISIG | ICANON | IEXTEN | ECHO | ECHOE | ECHOK | ECHOCTL | ECHOKE,
-    .c_cflag = CS8 | CREAD,
-    .c_cc[VINTR] = '',
-    .c_cc[VQUIT] = '',
-    .c_cc[VERASE] = 127,
-    .c_cc[VKILL] = '',
-    .c_cc[VEOF] = '',
-    .c_cc[VSTART] = '',
-    .c_cc[VSTOP] = '',
-    .c_cc[VSUSP] = '',
-    .c_cc[VREPRINT] = '',
-    .c_cc[VWERASE] = '',
-    .c_cc[VLNEXT] = '',
-    .c_cc[VDISCARD] = '',
-    .c_cc[VMIN] = 1,
-    .c_cc[VTIME] = 0,
+static struct termios normal_termios = {
+    .c_iflag = TTYDEF_IFLAG,
+    .c_oflag = TTYDEF_OFLAG,
+    .c_lflag = TTYDEF_LFLAG,
+    .c_cflag = TTYDEF_CFLAG,
 };
 
 // This termios is used for TUI mode:
 static struct termios tui_termios = {
     .c_iflag = 0,
-    .c_oflag = ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0,
+    .c_oflag = TTYDEF_OFLAG,
     .c_lflag = ECHOE | ECHOK | ECHOCTL | ECHOKE,
-    .c_cflag = CS8 | CREAD,
-    .c_cc[VINTR] = '',
-    .c_cc[VQUIT] = '',
-    .c_cc[VERASE] = 127,
-    .c_cc[VKILL] = '',
-    .c_cc[VEOF] = '',
-    .c_cc[VSTART] = '',
-    .c_cc[VSTOP] = '',
-    .c_cc[VSUSP] = '',
-    .c_cc[VREPRINT] = '',
-    .c_cc[VWERASE] = '',
-    .c_cc[VLNEXT] = '',
-    .c_cc[VDISCARD] = '',
-    .c_cc[VMIN] = 1,
-    .c_cc[VTIME] = 0,
+    .c_cflag = TTYDEF_CFLAG,
 };
 
 // File-local functions:
@@ -439,6 +415,8 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
  */
 btui_t *btui_enable(void)
 {
+    memcpy(normal_termios.c_cc, ttydefchars, sizeof(ttydefchars));
+    memcpy(tui_termios.c_cc, ttydefchars, sizeof(ttydefchars));
     char *tty_name = ttyname(STDIN_FILENO);
     FILE *in = fopen(tty_name, "r");
     if (!in) return NULL;

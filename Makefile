@@ -27,7 +27,7 @@ c:
 	@cd C; make
 
 testc:
-	@cd C; make test
+	@cd C; make G=$(G) O=$(O) test
 
 rainbow:
 	@cd C; make rainbowdemo
