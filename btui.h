@@ -9,18 +9,14 @@
 #ifndef FILE__BTUI_H
 #define FILE__BTUI_H
 
-#include <unistd.h>
-
-#define TTYDEFCHARS 1
-#include <termios.h>
-#undef TTYDEFCHARS
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 #include <time.h>
+#include <unistd.h>
 
 #define BTUI_VERSION 4
 
@@ -248,21 +244,8 @@ static keyname_t key_names[] = {
     {KEY_F11, "F11"}, {KEY_F12, "F12"},
 };
 
-// This is the default termios for normal terminal behavior:
-static struct termios normal_termios = {
-    .c_iflag = TTYDEF_IFLAG,
-    .c_oflag = TTYDEF_OFLAG,
-    .c_lflag = TTYDEF_LFLAG,
-    .c_cflag = TTYDEF_CFLAG,
-};
-
-// This termios is used for TUI mode:
-static struct termios tui_termios = {
-    .c_iflag = 0,
-    .c_oflag = TTYDEF_OFLAG,
-    .c_lflag = ECHOE | ECHOK | ECHOCTL | ECHOKE,
-    .c_cflag = TTYDEF_CFLAG,
-};
+// This is the default termios for normal terminal behavior and the text-user-interface one:
+static struct termios normal_termios, tui_termios;
 
 // File-local functions:
 
@@ -415,18 +398,18 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
  */
 btui_t *btui_enable(void)
 {
-    memcpy(normal_termios.c_cc, ttydefchars, sizeof(ttydefchars));
-    memcpy(tui_termios.c_cc, ttydefchars, sizeof(ttydefchars));
-    char *tty_name = ttyname(STDIN_FILENO);
-    FILE *in = fopen(tty_name, "r");
+    FILE *in = fopen(ttyname(STDIN_FILENO), "r");
     if (!in) return NULL;
-    FILE *out = fopen(tty_name, "w");
+    FILE *out = fopen(ttyname(STDOUT_FILENO), "w");
     if (!out) {
         fclose(in);
         return NULL;
     }
 
-    if (tcsetattr(fileno(out), TCSANOW, &tui_termios) == -1) {
+    if (tcgetattr(fileno(in), &normal_termios)
+      || tcgetattr(fileno(in), &tui_termios)
+      || (cfmakeraw(&tui_termios),
+         tcsetattr(fileno(out), TCSANOW, &tui_termios))) {
         fclose(in);
         fclose(out);
         return NULL;
