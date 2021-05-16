@@ -80,6 +80,7 @@ const cursor_t CURSOR_STEADY_BAR         = 6;
 // Overlapping key codes:
 #define KEY_CTRL_BACKTICK  KEY_CTRL_AT
 #define KEY_CTRL_2         KEY_CTRL_AT
+#define KEY_CTRL_SPACE     KEY_CTRL_AT
 #define KEY_BACKSPACE      KEY_CTRL_H
 #define KEY_TAB            KEY_CTRL_I
 #define KEY_ENTER          KEY_CTRL_M
