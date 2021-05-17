@@ -45,10 +45,11 @@ testpython:
 	@cd Python; make test
 
 install:
-	mkdir -pv -m 755 "${PREFIX}/include" \
-	&& cp -v btui.h "${PREFIX}/include/"
+	mkdir -pv -m 755 "${PREFIX}/include" "${PREFIX}/man/man3" \
+	&& cp -v btui.h "${PREFIX}/include/" \
+	&& cp -v btui.3 "${PREFIX}/man/man3/"
 
 uninstall:
-	rm -f "${PREFIX}/include/btui.h"
+	rm -f "${PREFIX}/include/btui.h" "${PREFIX}/man/man3/btui.3"
 
 .PHONY: all, checksyntax, clean, c, testc, lua, testlua, python, testpython, install, uninstall

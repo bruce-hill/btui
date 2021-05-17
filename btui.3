@@ -1,0 +1,65 @@
+.\" Manpage for BTUI.
+.\" Contact bruce@bruce-hill.com to correct errors or typos.
+.TH man 1 "16 May 2021" "5" "BTUI manual page"
+.SH NAME
+BTUI \- Bruce's Terminal User Interface library
+.SH SYNOPSIS
+.LP
+.nf
+.ft B
+#include <btui.h>
+.ft
+.fi
+.LP
+.nf
+
+\fIint     \fBbtui_clear(\fIbtui_t *bt, int mode\fB)
+\fIvoid    \fBbtui_disable(\fIbtui_t *bt\fB)
+\fIvoid    \fBbtui_draw_linebox(\fIbtui_t *bt, int x, int y, int w, int h\fB)
+\fIvoid    \fBbtui_draw_shadow(\fIbtui_t *bt, int x, int y, int w, int h\fB)
+\fIbtui_t* \fBbtui_create(\fIbtui_mode_t mode\fB)
+\fI#define \fBbtui_enable(\fI) btui_create(BTUI_MODE_TUI\fB)
+\fIvoid    \fBbtui_fill_box(\fIbtui_t *bt, int x, int y, int w, int h\fB)
+\fIint     \fBbtui_flush(\fIbtui_t *bt\fB)
+\fIint     \fBbtui_getkey(\fIbtui_t *bt, int timeout, int *mouse_x, int *mouse_y\fB)
+\fIint     \fBbtui_hide_cursor(\fIbtui_t *bt\fB)
+\fIchar    \fB*btui_keyname(\fIint key, char *buf\fB)
+\fIint     \fBbtui_keynamed(\fIconst char *name\fB)
+\fIint     \fBbtui_move_cursor(\fIbtui_t *bt, int x, int y\fB)
+\fI#define \fBbtui_printf(\fIbt, ...\fB) fprintf((bt)->out, __VA_ARGS__)
+\fIint     \fBbtui_puts(\fIbtui_t *bt, const char *s\fB)
+\fIint     \fBbtui_scroll(\fIbtui_t *bt, int firstline, int lastline, int scroll_amount\fB)
+\fIint     \fBbtui_set_attributes(\fIbtui_t *bt, attr_t attrs\fB)
+\fIint     \fBbtui_set_bg(\fIbtui_t *bt, unsigned char r, unsigned char g, unsigned char b\fB)
+\fIint     \fBbtui_set_bg_hex(\fIbtui_t *bt, int hex\fB)
+\fIint     \fBbtui_set_cursor(\fIbtui_t *bt, cursor_t cur\fB)
+\fIint     \fBbtui_set_fg(\fIbtui_t *bt, unsigned char r, unsigned char g, unsigned char b\fB)
+\fIint     \fBbtui_set_fg_hex(\fIbtui_t *bt, int hex\fB)
+\fIint     \fBbtui_show_cursor(\fIbtui_t *bt\fB)
+\fIint     \fBbtui_suspend(\fIbtui_t *bt\fB)
+
+.SH DESCRIPTION
+\fBBTUI\fR is a compact text-user-interface library that can serve as a
+minimalist alternative to ncurses.
+
+.SH EXAMPLES
+.TP
+.ft
+.fi
+.LP
+.nf
+btui_t *bt = btui_create(BTUI_MODE_TUI);
+char name[100];
+int key = -1;
+do {
+    btui_clear(bt, BTUI_CLEAR_SCREEN);
+    btui_move_cursor(bt, bt->width/2, bt->height/2);
+    btui_keyname(key, name);
+    btui_printf(bt, "You pressed: %s", name);
+    btui_flush(bt);
+    do key = btui_getkey(bt, 0, NULL, NULL);
+    while (key == -1);
+} while (key != KEY_CTRL_C && key != 'q');
+
+.SH AUTHOR
+Bruce Hill (bruce@bruce-hill.com)
