@@ -93,7 +93,8 @@ int     btui_clear(btui_t *bt, int mode);
 void    btui_disable(btui_t *bt);
 void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
 void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
-btui_t* btui_enable(void);
+btui_t* btui_create(btui_mode_t mode);
+#define btui_enable() btui_create(BTUI_MODE_TUI)
 void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
 int     btui_flush(btui_t *bt);
 int     btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y);

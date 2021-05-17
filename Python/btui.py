@@ -20,7 +20,9 @@ class BTUI_struct(ctypes.Structure):
         ('size_changed', ctypes.c_int),
     ]
 
-libbtui.btui_enable.restype = ctypes.POINTER(BTUI_struct)
+libbtui.btui_create.restype = ctypes.POINTER(BTUI_struct)
+
+BTUI_MODE_UNINITIALIZED, BTUI_MODE_NORMAL, BTUI_MODE_TUI = 0, 1, 2
 
 attr = lambda name: ctypes.c_longlong.in_dll(libbtui, name)
 attr_t = ctypes.c_longlong
@@ -141,8 +143,21 @@ class BTUI:
         libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
         libbtui.btui_flush(self._btui)
 
-    def enable(self):
-        self._btui = libbtui.btui_enable()
+    def enable(self, mode='TUI'):
+        if mode == 'TUI':
+            mode = BTUI_MODE_TUI
+        elif mode == 'normal':
+            mode = BTUI_MODE_NORMAL
+        else: raise ArgumentError("Invalid mode: "+str(mode))
+        self._btui = libbtui.btui_create(mode)
+
+    def set_mode(self, mode):
+        if mode == 'TUI':
+            mode = BTUI_MODE_TUI
+        elif mode == 'normal':
+            mode = BTUI_MODE_NORMAL
+        else: raise ArgumentError("Invalid mode: "+str(mode))
+        self._btui = libbtui.set_mode(self._btui, mode)
 
     @contextmanager
     def fg(self, r, g, b):
@@ -274,7 +289,7 @@ for fn_name in ('clear', 'draw_shadow', 'fill_box', 'move', 'set_cursor', 'hide_
 
 _btui = None
 @contextmanager
-def open_btui(*, debug=False, delay=0.05):
+def open_btui(*, debug=False, delay=0.05, mode='TUI'):
     global _btui
     if not _btui:
         if debug:
@@ -282,7 +297,7 @@ def open_btui(*, debug=False, delay=0.05):
             _btui.delay = delay
         else:
             _btui = BTUI()
-    _btui.enable()
+    _btui.enable(mode=mode)
     _btui.move(0, 0)
     try: yield _btui
     finally: _btui.disable()

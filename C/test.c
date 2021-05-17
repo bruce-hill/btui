@@ -7,7 +7,7 @@
 
 int main(void)
 {
-    btui_t *bt = btui_enable();
+    btui_t *bt = btui_create(BTUI_MODE_TUI);
     if (!bt) return 1;
     int done = 0;
     int x = 1, y = 1;

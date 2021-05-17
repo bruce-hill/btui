@@ -23,7 +23,13 @@ static int Lbtui_enable(lua_State *L)
 {
     btui_t **bt = (btui_t**)lua_touserdata(L, 1);
     if (bt == NULL) luaL_error(L, "Not a BTUI object");
-    *bt = btui_enable();
+    const char *modestring = luaL_optlstring(L, 2, "TUI", NULL);
+    btui_mode_t mode = BTUI_MODE_TUI;
+    if (strcmp(modestring, "normal") == 0)
+        mode = BTUI_MODE_NORMAL;
+    else if (strcmp(modestring, "TUI") != 0)
+        luaL_error(L, "Invalid BTUI mode");
+    *bt = btui_create(mode);
     btui_move_cursor(*bt, 0, 0);
     btui_flush(*bt);
     return 0;
@@ -180,6 +186,20 @@ static int Lbtui_setcursor(lua_State *L)
         lua_error(L);
     }
     btui_flush(*bt);
+    return 0;
+}
+
+static int Lbtui_setmode(lua_State *L)
+{
+    btui_t **bt = (btui_t**)lua_touserdata(L, 1);
+    if (bt == NULL) luaL_error(L, "Not a BTUI object");
+    const char *modestring = luaL_checkstring(L, 2);
+    btui_mode_t mode = BTUI_MODE_TUI;
+    if (strcmp(modestring, "normal") == 0)
+        mode = BTUI_MODE_NORMAL;
+    else if (strcmp(modestring, "TUI") != 0)
+        luaL_error(L, "Invalid BTUI mode");
+    btui_set_mode(*bt, mode);
     return 0;
 }
 
@@ -372,7 +392,7 @@ static int Lbtui_wrap(lua_State *L)
     lua_pushlightuserdata(L, (void*)&BTUI_METATABLE);
     lua_gettable(L, LUA_REGISTRYINDEX);
     lua_setmetatable(L, -2);
-    *bt = btui_enable();
+    *bt = btui_create(BTUI_MODE_TUI);
     btui_move_cursor(*bt, 0, 0);
     btui_flush(*bt);
     int status = lua_pcall(L, 1, 0, 0);
@@ -495,6 +515,7 @@ static const luaL_Reg Rclass_metamethods[] =
     {"scroll",          Lbtui_scroll},
     {"setattributes",   Lbtui_setattributes},
     {"setcursor",       Lbtui_setcursor},
+    {"setmode",         Lbtui_setmode},
     {"shadow",          Lbtui_shadow},
     {"showcursor",      Lbtui_showcursor},
     {"suspend",         Lbtui_suspend},

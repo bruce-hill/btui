@@ -29,8 +29,6 @@
 #define T_ALT_SCREEN  "1049"
 #define T_ON(opt)  "\033[?" opt "h"
 #define T_OFF(opt) "\033[?" opt "l"
-#define BTUI_ENTER T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR)
-#define BTUI_LEAVE  T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m"
 
 // Maximum time in milliseconds between double clicks
 #ifndef BTUI_DOUBLECLICK_THRESHOLD
@@ -43,6 +41,12 @@
 #define MOD_CTRL   (1 << (MOD_BITSHIFT + 1))
 #define MOD_ALT    (1 << (MOD_BITSHIFT + 2))
 #define MOD_SHIFT  (1 << (MOD_BITSHIFT + 3))
+
+typedef enum {
+    BTUI_MODE_UNINITIALIZED = 0,
+    BTUI_MODE_NORMAL,
+    BTUI_MODE_TUI,
+} btui_mode_t;
 
 typedef enum {
     // ASCII chars:
@@ -167,6 +171,7 @@ typedef struct {
     FILE *in, *out;
     int width, height;
     int size_changed;
+    btui_mode_t mode;
 } btui_t;
 
 // Key Names:
@@ -181,7 +186,8 @@ int     btui_clear(btui_t *bt, int mode);
 void    btui_disable(btui_t *bt);
 void    btui_draw_linebox(btui_t *bt, int x, int y, int w, int h);
 void    btui_draw_shadow(btui_t *bt, int x, int y, int w, int h);
-btui_t* btui_enable(void);
+btui_t* btui_create(btui_mode_t mode);
+#define btui_enable() btui_create(BTUI_MODE_TUI)
 void    btui_fill_box(btui_t *bt, int x, int y, int w, int h);
 int     btui_flush(btui_t *bt);
 void    btui_force_close(btui_t *bt);
@@ -199,12 +205,13 @@ int     btui_set_bg_hex(btui_t *bt, int hex);
 int     btui_set_cursor(btui_t *bt, cursor_t cur);
 int     btui_set_fg(btui_t *bt, unsigned char r, unsigned char g, unsigned char b);
 int     btui_set_fg_hex(btui_t *bt, int hex);
+void    btui_set_mode(btui_t *bt, btui_mode_t mode);
 int     btui_show_cursor(btui_t *bt);
 int     btui_suspend(btui_t *bt);
 
 
 // File-local variables:
-static btui_t current_bt = {.in = NULL, .out = NULL};
+static btui_t current_bt = {.in = NULL, .out = NULL, .mode = BTUI_MODE_UNINITIALIZED};
 
 // The names of keys that don't render well:
 static keyname_t key_names[] = {
@@ -282,7 +289,7 @@ static void btui_cleanup(void)
     if (!current_bt.out) return;
     tcsetattr(fileno(current_bt.out), TCSANOW, &normal_termios);
     btui_set_cursor(&current_bt, CURSOR_DEFAULT);
-    fputs(BTUI_LEAVE, current_bt.out);
+    btui_set_mode(&current_bt, BTUI_MODE_UNINITIALIZED);
     fflush(current_bt.out);
     fclose(current_bt.in);
     fclose(current_bt.out);
@@ -296,10 +303,11 @@ static void btui_cleanup(void)
  */
 static void btui_cleanup_and_raise(int sig)
 {
+    btui_mode_t mode = current_bt.mode;
     btui_cleanup();
     raise(sig);
     // This code will only ever be run if sig is SIGTSTP/SIGSTOP, otherwise, raise() won't return:
-    btui_enable();
+    btui_create(mode);
     struct sigaction sa = {.sa_handler = &btui_cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
     sigaction(sig, &sa, NULL);
 }
@@ -397,11 +405,11 @@ void btui_draw_shadow(btui_t *bt, int x, int y, int w, int h)
  * Enable TUI mode for this terminal and return a pointer to the BTUI struct
  * that should be passed to future API calls.
  */
-btui_t *btui_enable(void)
+btui_t *btui_create(btui_mode_t mode)
 {
-    FILE *in = fopen(ttyname(STDIN_FILENO), "r");
+    FILE *in = fopen("/dev/tty", "r");
     if (!in) return NULL;
-    FILE *out = fopen(ttyname(STDOUT_FILENO), "w");
+    FILE *out = fopen("/dev/tty", "w");
     if (!out) {
         fclose(in);
         return NULL;
@@ -418,6 +426,7 @@ btui_t *btui_enable(void)
 
     current_bt.in = in;
     current_bt.out = out;
+    current_bt.mode = BTUI_MODE_NORMAL;
     atexit(btui_cleanup);
 
     struct sigaction sa_winch = {.sa_handler = &update_term_size};
@@ -429,10 +438,28 @@ btui_t *btui_enable(void)
 
     update_term_size(SIGWINCH);
     current_bt.size_changed = 0;
-
-    fputs(BTUI_ENTER, out);
-    fflush(out);
+    btui_set_mode(&current_bt, mode);
     return &current_bt;
+}
+
+/*
+ * Set the display mode of BTUI
+ */
+void btui_set_mode(btui_t *bt, btui_mode_t mode)
+{
+    if (mode == bt->mode) return;
+    switch (mode) {
+        case BTUI_MODE_NORMAL: case BTUI_MODE_UNINITIALIZED:
+            if (bt->mode == BTUI_MODE_TUI)
+                fputs(T_OFF(T_ALT_SCREEN), bt->out);
+            fputs(T_ON(T_SHOW_CURSOR ";" T_WRAP) T_OFF(T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR) "\033[0m", bt->out);
+            break;
+        case BTUI_MODE_TUI:
+            fputs(T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR), bt->out);
+            break;
+    }
+    fflush(bt->out);
+    bt->mode = mode;
 }
 
 /*
