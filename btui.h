@@ -660,6 +660,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
  */
 char *btui_keyname(int key, char *buf)
 {
+    if (key == -1) return buf + sprintf(buf, "<none>");
     if (key & MOD_META) buf = stpcpy(buf, "Super-");
     if (key & MOD_CTRL) buf = stpcpy(buf, "Ctrl-");
     if (key & MOD_ALT) buf = stpcpy(buf, "Alt-");
