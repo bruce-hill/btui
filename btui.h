@@ -18,7 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BTUI_VERSION 4
+#define BTUI_VERSION 5
 
 // Terminal escape sequences:
 #define T_WRAP        "7"
