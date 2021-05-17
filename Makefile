@@ -44,4 +44,11 @@ python:
 testpython:
 	@cd Python; make test
 
-.PHONY: all, checksyntax, clean, c, testc, lua, testlua, python, testpython
+install:
+	mkdir -pv -m 755 "${PREFIX}/include" \
+	&& cp -v btui.h "${PREFIX}/include/"
+
+uninstall:
+	rm -f "${PREFIX}/include/btui.h"
+
+.PHONY: all, checksyntax, clean, c, testc, lua, testlua, python, testpython, install, uninstall
