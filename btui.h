@@ -6,10 +6,11 @@
  * This file defines some Text User Interface (TUI) functionality.
  */
 
-#ifndef FILE__BTUI_H
-#define FILE__BTUI_H
+#ifndef __BTUI_H__
+#define __BTUI_H__
 
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,7 +115,7 @@ const int BTUI_CLEAR_LEFT   = _BTUI_CLEAR_LEFT;
 const int BTUI_CLEAR_RIGHT  = _BTUI_CLEAR_RIGHT;
 
 // Text attributes:
-typedef unsigned long long attr_t;
+typedef uint64_t attr_t;
 const attr_t BTUI_NORMAL               = 1ul << 0;
 const attr_t BTUI_BOLD                 = 1ul << 1;
 const attr_t BTUI_FAINT                = 1ul << 2;
@@ -457,6 +458,7 @@ void btui_set_mode(btui_t *bt, btui_mode_t mode)
         case BTUI_MODE_TUI:
             fputs(T_OFF(T_SHOW_CURSOR ";" T_WRAP)  T_ON(T_ALT_SCREEN ";" T_MOUSE_XY ";" T_MOUSE_CELL ";" T_MOUSE_SGR), bt->out);
             break;
+        default: break;
     }
     fflush(bt->out);
     bt->mode = mode;
@@ -578,6 +580,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
                 case 21: return modifiers | KEY_F10;
                 case 23: return modifiers | KEY_F11;
                 case 24: return modifiers | KEY_F12;
+                default: break;
             }
             return -1;
         case '<': { // Mouse clicks
@@ -619,6 +622,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
                             case MOUSE_LEFT_RELEASE: key = MOUSE_LEFT_DOUBLE; break;
                             case MOUSE_RIGHT_RELEASE: key = MOUSE_RIGHT_DOUBLE; break;
                             case MOUSE_MIDDLE_RELEASE: key = MOUSE_MIDDLE_DOUBLE; break;
+                            default: break;
                         }
                     }
                 }
@@ -674,7 +678,7 @@ char *btui_keyname(int key, char *buf)
     if (' ' < key && key <= '~')
         return buf + sprintf(buf, "%c", key);
     else
-        return buf + sprintf(buf, "\\x%02X", key);
+        return buf + sprintf(buf, "\\x%02X", (unsigned int)key);
 }
 
 /*
