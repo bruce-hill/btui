@@ -1,7 +1,7 @@
 PREFIX=
 CC ?= gcc
 O ?= -O2
-CFLAGS=-std=c99 -D_XOPEN_SOURCE=500 -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -Werror
+CFLAGS=-std=c99 -D_XOPEN_SOURCE=500 -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -Werror -flto
 CWARN=-Wall -Wpedantic -Wextra \
 	-Wsign-conversion -Wtype-limits -Wunused-result -Wnull-dereference \
 	-Waggregate-return -Walloc-zero -Walloca -Warith-conversion -Wcast-align -Wcast-align=strict \
