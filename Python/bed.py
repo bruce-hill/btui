@@ -76,6 +76,10 @@ class BedFile:
             newscroll = clamp(self.scroll, self.cursor.y - (self.size.y-1), self.cursor.y)
             if self.cursor.y > self.scroll + (self.size.y-1):
                 self.set_scroll(self.cursor.y - (self.size.y-1))
+        elif key == 'Home' or key == 'Ctrl-a':
+            self.cursor = Vec2(0, self.cursor.y)
+        elif key == 'End' or key == 'Ctrl-e':
+            self.cursor = Vec2(len(self.lines[self.cursor.y]), self.cursor.y)
         elif key == 'Page Down' or key == 'Ctrl-d':
             self.set_scroll(self.scroll + self.bt.height // 2)
         elif key == 'Page Up' or key == 'Ctrl-u':
