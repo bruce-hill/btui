@@ -1,9 +1,10 @@
 import ctypes
-import time
+import enum
 import functools
+import time
 from contextlib import contextmanager
 
-__all__ = ['open_btui']
+__all__ = ['open', 'TextAttr', 'ClearType', 'CursorType', 'BTUIMode']
 
 # Load the shared library into c types.
 libbtui = ctypes.CDLL("./libbtui.so")
@@ -22,99 +23,112 @@ class BTUI_struct(ctypes.Structure):
 
 libbtui.btui_create.restype = ctypes.POINTER(BTUI_struct)
 
-BTUI_MODE_UNINITIALIZED, BTUI_MODE_NORMAL, BTUI_MODE_TUI = 0, 1, 2
-
-attr = lambda name: ctypes.c_longlong.in_dll(libbtui, name)
+attr = lambda name: ctypes.c_longlong.in_dll(libbtui, name).value
 attr_t = ctypes.c_longlong
-BTUI_ATTRS = {
-    "normal":               attr('BTUI_NORMAL'),
-    "bold":                 attr('BTUI_BOLD'),
-    "faint":                attr('BTUI_FAINT'),
-    "dim":                  attr('BTUI_FAINT'),
-    "italic":               attr('BTUI_ITALIC'),
-    "underline":            attr('BTUI_UNDERLINE'),
-    "blink_slow":           attr('BTUI_BLINK_SLOW'),
-    "blink_fast":           attr('BTUI_BLINK_FAST'),
-    "reverse":              attr('BTUI_REVERSE'),
-    "conceal":              attr('BTUI_CONCEAL'),
-    "strikethrough":        attr('BTUI_STRIKETHROUGH'),
-    "fraktur":              attr('BTUI_FRAKTUR'),
-    "double_underline":     attr('BTUI_DOUBLE_UNDERLINE'),
-    "no_bold_or_faint":     attr('BTUI_NO_BOLD_OR_FAINT'),
-    "no_italic_or_fraktur": attr('BTUI_NO_ITALIC_OR_FRAKTUR'),
-    "no_underline":         attr('BTUI_NO_UNDERLINE'),
-    "no_blink":             attr('BTUI_NO_BLINK'),
-    "no_reverse":           attr('BTUI_NO_REVERSE'),
-    "no_conceal":           attr('BTUI_NO_CONCEAL'),
-    "no_strikethrough":     attr('BTUI_NO_STRIKETHROUGH'),
-    "fg_black":             attr('BTUI_FG_BLACK'),
-    "fg_red":               attr('BTUI_FG_RED'),
-    "fg_green":             attr('BTUI_FG_GREEN'),
-    "fg_yellow":            attr('BTUI_FG_YELLOW'),
-    "fg_blue":              attr('BTUI_FG_BLUE'),
-    "fg_magenta":           attr('BTUI_FG_MAGENTA'),
-    "fg_cyan":              attr('BTUI_FG_CYAN'),
-    "fg_white":             attr('BTUI_FG_WHITE'),
-    "fg_normal":            attr('BTUI_FG_NORMAL'),
-    "bg_black":             attr('BTUI_BG_BLACK'),
-    "bg_red":               attr('BTUI_BG_RED'),
-    "bg_green":             attr('BTUI_BG_GREEN'),
-    "bg_yellow":            attr('BTUI_BG_YELLOW'),
-    "bg_blue":              attr('BTUI_BG_BLUE'),
-    "bg_magenta":           attr('BTUI_BG_MAGENTA'),
-    "bg_cyan":              attr('BTUI_BG_CYAN'),
-    "bg_white":             attr('BTUI_BG_WHITE'),
-    "bg_normal":            attr('BTUI_BG_NORMAL'),
-    "framed":               attr('BTUI_FRAMED'),
-    "encircled":            attr('BTUI_ENCIRCLED'),
-    "overlined":            attr('BTUI_OVERLINED'),
-}
+
+class TextAttr(enum.IntEnum):
+    NORMAL                 = attr('BTUI_NORMAL')
+    BOLD                   = attr('BTUI_BOLD')
+    FAINT                  = attr('BTUI_FAINT')
+    DIM                    = attr('BTUI_FAINT')
+    ITALIC                 = attr('BTUI_ITALIC')
+    UNDERLINE              = attr('BTUI_UNDERLINE')
+    BLINK_SLOW             = attr('BTUI_BLINK_SLOW')
+    BLINK_FAST             = attr('BTUI_BLINK_FAST')
+    REVERSE                = attr('BTUI_REVERSE')
+    CONCEAL                = attr('BTUI_CONCEAL')
+    STRIKETHROUGH          = attr('BTUI_STRIKETHROUGH')
+    FRAKTUR                = attr('BTUI_FRAKTUR')
+    DOUBLE_UNDERLINE       = attr('BTUI_DOUBLE_UNDERLINE')
+    NO_BOLD_OR_FAINT       = attr('BTUI_NO_BOLD_OR_FAINT')
+    NO_ITALIC_OR_FRAKTUR   = attr('BTUI_NO_ITALIC_OR_FRAKTUR')
+    NO_UNDERLINE           = attr('BTUI_NO_UNDERLINE')
+    NO_BLINK               = attr('BTUI_NO_BLINK')
+    NO_REVERSE             = attr('BTUI_NO_REVERSE')
+    NO_CONCEAL             = attr('BTUI_NO_CONCEAL')
+    NO_STRIKETHROUGH       = attr('BTUI_NO_STRIKETHROUGH')
+    FG_BLACK               = attr('BTUI_FG_BLACK')
+    FG_RED                 = attr('BTUI_FG_RED')
+    FG_GREEN               = attr('BTUI_FG_GREEN')
+    FG_YELLOW              = attr('BTUI_FG_YELLOW')
+    FG_BLUE                = attr('BTUI_FG_BLUE')
+    FG_MAGENTA             = attr('BTUI_FG_MAGENTA')
+    FG_CYAN                = attr('BTUI_FG_CYAN')
+    FG_WHITE               = attr('BTUI_FG_WHITE')
+    FG_NORMAL              = attr('BTUI_FG_NORMAL')
+    BG_BLACK               = attr('BTUI_BG_BLACK')
+    BG_RED                 = attr('BTUI_BG_RED')
+    BG_GREEN               = attr('BTUI_BG_GREEN')
+    BG_YELLOW              = attr('BTUI_BG_YELLOW')
+    BG_BLUE                = attr('BTUI_BG_BLUE')
+    BG_MAGENTA             = attr('BTUI_BG_MAGENTA')
+    BG_CYAN                = attr('BTUI_BG_CYAN')
+    BG_WHITE               = attr('BTUI_BG_WHITE')
+    BG_NORMAL              = attr('BTUI_BG_NORMAL')
+    FRAMED                 = attr('BTUI_FRAMED')
+    ENCIRCLED              = attr('BTUI_ENCIRCLED')
+    OVERLINED              = attr('BTUI_OVERLINED')
+    NO_FRAMED_OR_ENCIRCLED = attr('BTUI_NO_FRAMED_OR_ENCIRCLED')
+    NO_OVERLINED           = attr('BTUI_NO_OVERLINED')
 
 BTUI_INVERSE_ATTRS = {
-    "normal":               attr('BTUI_NORMAL'),
-    "bold":                 attr('BTUI_NO_BOLD_OR_FAINT'),
-    "faint":                attr('BTUI_NO_BOLD_OR_FAINT'),
-    "dim":                  attr('BTUI_NO_BOLD_OR_FAINT'),
-    "italic":               attr('BTUI_NO_ITALIC_OR_FRAKTUR'),
-    "underline":            attr('BTUI_NO_UNDERLINE'),
-    "blink_slow":           attr('BTUI_NO_BLINK'),
-    "blink_fast":           attr('BTUI_NO_BLINK'),
-    "reverse":              attr('BTUI_NO_REVERSE'),
-    "conceal":              attr('BTUI_NO_CONCEAL'),
-    "strikethrough":        attr('BTUI_NO_STRIKETHROUGH'),
-    "fraktur":              attr('BTUI_NO_ITALIC_OR_FRAKTUR'),
-    "double_underline":     attr('BTUI_NO_UNDERLINE'),
-    "fg_black":             attr('BTUI_FG_NORMAL'),
-    "fg_red":               attr('BTUI_FG_NORMAL'),
-    "fg_green":             attr('BTUI_FG_NORMAL'),
-    "fg_yellow":            attr('BTUI_FG_NORMAL'),
-    "fg_blue":              attr('BTUI_FG_NORMAL'),
-    "fg_magenta":           attr('BTUI_FG_NORMAL'),
-    "fg_cyan":              attr('BTUI_FG_NORMAL'),
-    "fg_white":             attr('BTUI_FG_NORMAL'),
-    "fg_normal":            attr('BTUI_FG_NORMAL'),
-    "bg_black":             attr('BTUI_BG_NORMAL'),
-    "bg_red":               attr('BTUI_BG_NORMAL'),
-    "bg_green":             attr('BTUI_BG_NORMAL'),
-    "bg_yellow":            attr('BTUI_BG_NORMAL'),
-    "bg_blue":              attr('BTUI_BG_NORMAL'),
-    "bg_magenta":           attr('BTUI_BG_NORMAL'),
-    "bg_cyan":              attr('BTUI_BG_NORMAL'),
-    "bg_white":             attr('BTUI_BG_NORMAL'),
-    "bg_normal":            attr('BTUI_BG_NORMAL'),
-    "framed":               attr('BTUI_NO_FRAMED_OR_ENCIRCLED'),
-    "encircled":            attr('BTUI_NO_FRAMED_OR_ENCIRCLED'),
-    "overlined":            attr('BTUI_NO_OVERLINED'),
+    TextAttr.NORMAL          : TextAttr.NORMAL,
+    TextAttr.BOLD            : TextAttr.NO_BOLD_OR_FAINT,
+    TextAttr.FAINT           : TextAttr.NO_BOLD_OR_FAINT,
+    TextAttr.DIM             : TextAttr.NO_BOLD_OR_FAINT,
+    TextAttr.ITALIC          : TextAttr.NO_ITALIC_OR_FRAKTUR,
+    TextAttr.UNDERLINE       : TextAttr.NO_UNDERLINE,
+    TextAttr.BLINK_SLOW      : TextAttr.NO_BLINK,
+    TextAttr.BLINK_FAST      : TextAttr.NO_BLINK,
+    TextAttr.REVERSE         : TextAttr.NO_REVERSE,
+    TextAttr.CONCEAL         : TextAttr.NO_CONCEAL,
+    TextAttr.STRIKETHROUGH   : TextAttr.NO_STRIKETHROUGH,
+    TextAttr.FRAKTUR         : TextAttr.NO_ITALIC_OR_FRAKTUR,
+    TextAttr.DOUBLE_UNDERLINE: TextAttr.NO_UNDERLINE,
+    TextAttr.FG_BLACK        : TextAttr.FG_NORMAL,
+    TextAttr.FG_RED          : TextAttr.FG_NORMAL,
+    TextAttr.FG_GREEN        : TextAttr.FG_NORMAL,
+    TextAttr.FG_YELLOW       : TextAttr.FG_NORMAL,
+    TextAttr.FG_BLUE         : TextAttr.FG_NORMAL,
+    TextAttr.FG_MAGENTA      : TextAttr.FG_NORMAL,
+    TextAttr.FG_CYAN         : TextAttr.FG_NORMAL,
+    TextAttr.FG_WHITE        : TextAttr.FG_NORMAL,
+    TextAttr.FG_NORMAL       : TextAttr.FG_NORMAL,
+    TextAttr.BG_BLACK        : TextAttr.BG_NORMAL,
+    TextAttr.BG_RED          : TextAttr.BG_NORMAL,
+    TextAttr.BG_GREEN        : TextAttr.BG_NORMAL,
+    TextAttr.BG_YELLOW       : TextAttr.BG_NORMAL,
+    TextAttr.BG_BLUE         : TextAttr.BG_NORMAL,
+    TextAttr.BG_MAGENTA      : TextAttr.BG_NORMAL,
+    TextAttr.BG_CYAN         : TextAttr.BG_NORMAL,
+    TextAttr.BG_WHITE        : TextAttr.BG_NORMAL,
+    TextAttr.BG_NORMAL       : TextAttr.BG_NORMAL,
+    TextAttr.FRAMED          : TextAttr.NO_FRAMED_OR_ENCIRCLED,
+    TextAttr.ENCIRCLED       : TextAttr.NO_FRAMED_OR_ENCIRCLED,
+    TextAttr.OVERLINED       : TextAttr.NO_OVERLINED,
 }
 
-BTUI_CLEAR_VALUES = {
-    "screen": 0,
-    "above":  1,
-    "below":  2,
-    "line":   3,
-    "left":   4,
-    "right":  5,
-}
+class BTUIMode(enum.IntEnum):
+    UNINITIALIZED = 0
+    NORMAL        = 1
+    TUI           = 2
+
+class CursorType(enum.IntEnum):
+    DEFAULT            = 0
+    BLINKING_BLOCK     = 1
+    BLOCK              = 2
+    BLINKING_UNDERLINE = 3
+    UNDERLINE          = 4
+    BLINKING_BAR       = 5
+    BAR                = 6
+
+class ClearType(enum.IntEnum):
+    SCREEN = 0
+    ABOVE  = 1
+    BELOW  = 2
+    LINE   = 3
+    LEFT   = 4
+    RIGHT  = 5
 
 class BTUI:
     @contextmanager
@@ -129,11 +143,11 @@ class BTUI:
         try: yield
         finally: self.set_attributes("bg_normal")
 
-    def clear(self, mode='screen'):
+    def clear(self, clear_type=ClearType.SCREEN):
         assert self._btui
-        if mode not in BTUI_CLEAR_VALUES:
-            raise ArgumentError("Not a supported clear type: "+repr(mode))
-        libbtui.btui_clear(self._btui, BTUI_CLEAR_VALUES[mode])
+        if isinstance(clear_type, str):
+            clear_type = ClearType[clear_type.upper()]
+        libbtui.btui_clear(self._btui, clear_type)
         libbtui.btui_flush(self._btui)
 
     def disable(self):
@@ -150,20 +164,14 @@ class BTUI:
         libbtui.btui_draw_shadow(self._btui, int(x), int(y), int(w), int(h))
         libbtui.btui_flush(self._btui)
 
-    def enable(self, mode='TUI'):
-        if mode == 'TUI':
-            mode = BTUI_MODE_TUI
-        elif mode == 'normal':
-            mode = BTUI_MODE_NORMAL
-        else: raise ArgumentError("Invalid mode: "+str(mode))
+    def enable(self, mode=BTUIMode.TUI):
+        if isinstance(mode, str):
+            mode = BTUIMode[mode.upper()]
         self._btui = libbtui.btui_create(mode)
 
     def set_mode(self, mode):
-        if mode == 'TUI':
-            mode = BTUI_MODE_TUI
-        elif mode == 'normal':
-            mode = BTUI_MODE_NORMAL
-        else: raise ArgumentError("Invalid mode: "+str(mode))
+        if isinstance(mode, str):
+            mode = BTUIMode[mode.upper()]
         self._btui = libbtui.set_mode(self._btui, mode)
 
     @contextmanager
@@ -204,13 +212,11 @@ class BTUI:
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
         libbtui.btui_flush(self._btui)
 
-    def set_cursor(self, cursor_type="default"):
+    def set_cursor(self, cursor_type=CursorType.DEFAULT):
         assert self._btui
-        if cursor_type in ('default', 'blinking block', 'blinking underline', 'blinking bar'):
-            c = ctypes.c_uint.in_dll(libbtui, 'CURSOR_' + cursor_type.replace(' ', '_').upper())
-        elif cursor_type in ('block', 'underline', 'bar'):
-            c = ctypes.c_uint.in_dll(libbtui, 'CURSOR_STEADY_' + cursor_type.upper())
-        libbtui.btui_set_cursor(self._btui, c)
+        if isinstance(cursor_type, str):
+            cursor_type = CursorType[cursor_type.upper()]
+        libbtui.btui_set_cursor(self._btui, cursor_type)
         libbtui.btui_flush(self._btui)
 
     def hide_cursor(self):
@@ -240,7 +246,9 @@ class BTUI:
         assert self._btui
         attr_long = ctypes.c_longlong(0)
         for a in attrs:
-            attr_long.value |= BTUI_ATTRS[a].value
+            if isinstance(a, str):
+                a = TextAttr[a.upper()]
+            attr_long.value |= a
         libbtui.btui_set_attributes(self._btui, attr_long)
 
     def set_bg(self, r, g, b):
@@ -259,7 +267,9 @@ class BTUI:
         assert self._btui
         attr_long = ctypes.c_longlong(0)
         for a in attrs:
-            attr_long.value |= BTUI_INVERSE_ATTRS[a].value
+            if isinstance(a, str):
+                a = TextAttr[a.upper()]
+            attr_long.value |= BTUI_INVERSE_ATTRS[a]
         libbtui.btui_set_attributes(self._btui, attr_long)
 
     @property
@@ -296,7 +306,7 @@ for fn_name in ('clear', 'draw_shadow', 'fill_box', 'move', 'set_cursor', 'hide_
 
 _btui = None
 @contextmanager
-def open_btui(*, debug=False, delay=0.05, mode='TUI'):
+def open(*, debug=False, delay=0.05, mode=BTUIMode.TUI):
     global _btui
     if not _btui:
         if debug:

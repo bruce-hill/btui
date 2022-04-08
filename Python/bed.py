@@ -10,7 +10,7 @@
 # Save with Ctrl-S, Quit with Ctrl-Q or Ctrl-C
 #
 import sys
-from btui import open_btui
+import btui
 from collections import namedtuple
 
 Vec2 = namedtuple('Vec2', 'x y')
@@ -141,7 +141,7 @@ class BedFile:
             x = self.pos.x
             self.bt.move(x, y)
             if lineno >= len(self.lines):
-                self.bt.clear('line')
+                self.bt.clear(btui.ClearType.LINE)
                 self.drawn.add(lineno)
                 continue
             with self.bt.attributes("faint"):
@@ -149,7 +149,7 @@ class BedFile:
                 x += self.numlen + 1
             self.bt.move(x, y)
             self.bt.write_bytes(bytes(self.lines[lineno]))
-            self.bt.clear('right')
+            self.bt.clear(btui.ClearType.RIGHT)
             self.drawn.add(lineno)
 
 class BED:
@@ -165,7 +165,7 @@ class BED:
         self.renders = 0
 
     def edit(self):
-        self.bt.set_cursor('blinking bar')
+        self.bt.set_cursor(btui.CursorType.BLINKING_BAR)
         self.render()
         key, mx, my = self.bt.getkey()
         while True:
@@ -212,7 +212,7 @@ class BED:
             if self.file.unsaved:
                 with self.bt.attributes("dim"):
                     self.bt.write(" (modified)")
-            self.bt.clear('right')
+            self.bt.clear(btui.ClearType.RIGHT)
             self.drawn.add(k)
 
         self.file.render()
@@ -221,7 +221,7 @@ class BED:
         with self.bt.attributes("bold"):
             self.bt.move(0, self.bt.height-1)
             self.bt.write("Ctrl-Q to quit, Ctrl-S to save")
-            self.bt.clear('right')
+            self.bt.clear(btui.ClearType.RIGHT)
         with self.bt.attributes("faint"):
             s = f"Line {self.file.cursor.y}, Col {self.file.cursor.x}, {self.renders} redraws"
             self.bt.move(self.bt.width-len(s), self.bt.height-1)
@@ -243,6 +243,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     filename = args[0]
-    with open_btui(debug=debug) as bt:
+    with btui.open(debug=debug) as bt:
         bed = BED(bt, filename)
         bed.edit()

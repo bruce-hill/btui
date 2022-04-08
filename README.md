@@ -163,13 +163,13 @@ Lua library, and `make testlua` to run the Lua BTUI demo.
 
 ### Python API
 
-The Python library has only one value: `open_btui()`. This is a context manager,
-which can be used to safely wrap TUI applications.
+The Python library has one main function: `btui.open()`. This is a context
+manager, which can be used to safely wrap TUI applications.
 
 ```python
 import btui
 
-with btui.open_btui() as bt:
+with btui.open() as bt:
     # Your code here...
 ```
 

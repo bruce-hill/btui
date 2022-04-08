@@ -101,12 +101,12 @@ const btui_key_t KEY_CTRL_SLASH     = KEY_CTRL_UNDERSCORE;
 const btui_key_t KEY_CTRL_8         = KEY_BACKSPACE2;
 
 typedef enum {
-    BTUI_CLEAR_SCREEN,
-    BTUI_CLEAR_ABOVE,
-    BTUI_CLEAR_BELOW,
-    BTUI_CLEAR_LINE,
-    BTUI_CLEAR_LEFT,
-    BTUI_CLEAR_RIGHT,
+    BTUI_CLEAR_SCREEN = 0,
+    BTUI_CLEAR_ABOVE  = 1,
+    BTUI_CLEAR_BELOW  = 2,
+    BTUI_CLEAR_LINE   = 3,
+    BTUI_CLEAR_LEFT   = 4,
+    BTUI_CLEAR_RIGHT  = 5,
 } btui_clear_t;
 
 // Text attributes:

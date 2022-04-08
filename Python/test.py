@@ -3,9 +3,9 @@
 # This file contains a simple test program for demonstrating some basic Python
 # BTUI usage.
 #
-from btui import open_btui
+import btui
 
-with open_btui() as bt:
+with btui.open() as bt:
     key = None
     x, y = 1, 1
     while key != 'q' and key != 'Ctrl-c':
