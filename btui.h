@@ -73,46 +73,41 @@ typedef enum {
     MOUSE_WHEEL_RELEASE, MOUSE_WHEEL_PRESS,
 } btui_key_t;
 
-typedef int cursor_t;
-const cursor_t CURSOR_DEFAULT            = 0;
-const cursor_t CURSOR_BLINKING_BLOCK     = 1;
-const cursor_t CURSOR_STEADY_BLOCK       = 2;
-const cursor_t CURSOR_BLINKING_UNDERLINE = 3;
-const cursor_t CURSOR_STEADY_UNDERLINE   = 4;
-const cursor_t CURSOR_BLINKING_BAR       = 5;
-const cursor_t CURSOR_STEADY_BAR         = 6;
+typedef enum {
+    CURSOR_DEFAULT            = 0,
+    CURSOR_BLINKING_BLOCK     = 1,
+    CURSOR_STEADY_BLOCK       = 2,
+    CURSOR_BLINKING_UNDERLINE = 3,
+    CURSOR_STEADY_UNDERLINE   = 4,
+    CURSOR_BLINKING_BAR       = 5,
+    CURSOR_STEADY_BAR         = 6,
+} cursor_t;
 
 // Overlapping key codes:
-#define KEY_CTRL_BACKTICK  KEY_CTRL_AT
-#define KEY_CTRL_2         KEY_CTRL_AT
-#define KEY_CTRL_SPACE     KEY_CTRL_AT
-#define KEY_BACKSPACE      KEY_CTRL_H
-#define KEY_TAB            KEY_CTRL_I
-#define KEY_ENTER          KEY_CTRL_M
-#define KEY_ESC            KEY_CTRL_LSQ_BRACKET
-#define KEY_CTRL_3         KEY_CTRL_LSQ_BRACKET
-#define KEY_CTRL_4         KEY_CTRL_BACKSLASH
-#define KEY_CTRL_5         KEY_CTRL_RSQ_BRACKET
-#define KEY_CTRL_TILDE     KEY_CTRL_CARET
-#define KEY_CTRL_6         KEY_CTRL_CARET
-#define KEY_CTRL_7         KEY_CTRL_UNDERSCORE
-#define KEY_CTRL_SLASH     KEY_CTRL_UNDERSCORE
-#define KEY_CTRL_8         KEY_BACKSPACE2
+const btui_key_t KEY_CTRL_BACKTICK  = KEY_CTRL_AT;
+const btui_key_t KEY_CTRL_2         = KEY_CTRL_AT;
+const btui_key_t KEY_CTRL_SPACE     = KEY_CTRL_AT;
+const btui_key_t KEY_BACKSPACE      = KEY_CTRL_H;
+const btui_key_t KEY_TAB            = KEY_CTRL_I;
+const btui_key_t KEY_ENTER          = KEY_CTRL_M;
+const btui_key_t KEY_ESC            = KEY_CTRL_LSQ_BRACKET;
+const btui_key_t KEY_CTRL_3         = KEY_CTRL_LSQ_BRACKET;
+const btui_key_t KEY_CTRL_4         = KEY_CTRL_BACKSLASH;
+const btui_key_t KEY_CTRL_5         = KEY_CTRL_RSQ_BRACKET;
+const btui_key_t KEY_CTRL_TILDE     = KEY_CTRL_CARET;
+const btui_key_t KEY_CTRL_6         = KEY_CTRL_CARET;
+const btui_key_t KEY_CTRL_7         = KEY_CTRL_UNDERSCORE;
+const btui_key_t KEY_CTRL_SLASH     = KEY_CTRL_UNDERSCORE;
+const btui_key_t KEY_CTRL_8         = KEY_BACKSPACE2;
 
-// These are defined as both `#define` and `const int` so that these values can
-// work in switch statements and still be available to Python.
-#define _BTUI_CLEAR_SCREEN 0
-#define _BTUI_CLEAR_ABOVE  1
-#define _BTUI_CLEAR_BELOW  2
-#define _BTUI_CLEAR_LINE   3
-#define _BTUI_CLEAR_LEFT   4
-#define _BTUI_CLEAR_RIGHT  5
-const int BTUI_CLEAR_SCREEN = _BTUI_CLEAR_SCREEN;
-const int BTUI_CLEAR_ABOVE  = _BTUI_CLEAR_ABOVE;
-const int BTUI_CLEAR_BELOW  = _BTUI_CLEAR_BELOW;
-const int BTUI_CLEAR_LINE   = _BTUI_CLEAR_LINE;
-const int BTUI_CLEAR_LEFT   = _BTUI_CLEAR_LEFT;
-const int BTUI_CLEAR_RIGHT  = _BTUI_CLEAR_RIGHT;
+typedef enum {
+    BTUI_CLEAR_SCREEN,
+    BTUI_CLEAR_ABOVE,
+    BTUI_CLEAR_BELOW,
+    BTUI_CLEAR_LINE,
+    BTUI_CLEAR_LEFT,
+    BTUI_CLEAR_RIGHT,
+} btui_clear_t;
 
 // Text attributes:
 typedef uint64_t attr_t;
@@ -338,12 +333,12 @@ static void update_term_size(int sig)
 int btui_clear(btui_t *bt, int mode)
 {
     switch (mode) {
-        case _BTUI_CLEAR_BELOW:  return fputs("\033[J", bt->out);
-        case _BTUI_CLEAR_ABOVE:  return fputs("\033[1J", bt->out);
-        case _BTUI_CLEAR_SCREEN: return fputs("\033[2J", bt->out);
-        case _BTUI_CLEAR_RIGHT:  return fputs("\033[K", bt->out);
-        case _BTUI_CLEAR_LEFT:   return fputs("\033[1K", bt->out);
-        case _BTUI_CLEAR_LINE:   return fputs("\033[2K", bt->out);
+        case BTUI_CLEAR_BELOW:  return fputs("\033[J", bt->out);
+        case BTUI_CLEAR_ABOVE:  return fputs("\033[1J", bt->out);
+        case BTUI_CLEAR_SCREEN: return fputs("\033[2J", bt->out);
+        case BTUI_CLEAR_RIGHT:  return fputs("\033[K", bt->out);
+        case BTUI_CLEAR_LEFT:   return fputs("\033[1K", bt->out);
+        case BTUI_CLEAR_LINE:   return fputs("\033[2K", bt->out);
         default:                return -1;
     }
 }
@@ -556,7 +551,7 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
         case 'Q': return numcode == 1 ? (modifiers | KEY_F2) : -1;
         case 'R': return numcode == 1 ? (modifiers | KEY_F3) : -1;
         case 'S': return numcode == 1 ? (modifiers | KEY_F4) : -1;
-        case 'Z': return MOD_SHIFT | modifiers | KEY_TAB;
+        case 'Z': return MOD_SHIFT | modifiers | (int)KEY_TAB;
         case '~':
             switch (numcode) {
                 case 1: return modifiers | KEY_HOME;
@@ -788,7 +783,7 @@ int btui_set_bg_hex(btui_t *bt, int hex)
  */
 int btui_set_cursor(btui_t *bt, cursor_t cur)
 {
-    return fprintf(bt->out, "\033[%d q", cur);
+    return fprintf(bt->out, "\033[%u q", cur);
 }
 
 /*

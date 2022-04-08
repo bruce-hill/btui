@@ -107,6 +107,14 @@ BTUI_INVERSE_ATTRS = {
     "overlined":            attr('BTUI_NO_OVERLINED'),
 }
 
+BTUI_CLEAR_VALUES = {
+    "screen": 0,
+    "above":  1,
+    "below":  2,
+    "line":   3,
+    "left":   4,
+    "right":  5,
+}
 
 class BTUI:
     @contextmanager
@@ -123,10 +131,9 @@ class BTUI:
 
     def clear(self, mode='screen'):
         assert self._btui
-        if mode not in ('screen', 'above', 'below', 'line', 'left', 'right'):
+        if mode not in BTUI_CLEAR_VALUES:
             raise ArgumentError("Not a supported clear type: "+repr(mode))
-        clr = ctypes.c_uint.in_dll(libbtui, 'BTUI_CLEAR_' + mode.upper())
-        libbtui.btui_clear(self._btui, clr)
+        libbtui.btui_clear(self._btui, BTUI_CLEAR_VALUES[mode])
         libbtui.btui_flush(self._btui)
 
     def disable(self):
