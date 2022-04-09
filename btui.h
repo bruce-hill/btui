@@ -71,6 +71,8 @@ typedef enum {
     MOUSE_LEFT_RELEASE, MOUSE_RIGHT_RELEASE, MOUSE_MIDDLE_RELEASE,
     MOUSE_LEFT_DOUBLE, MOUSE_RIGHT_DOUBLE, MOUSE_MIDDLE_DOUBLE,
     MOUSE_WHEEL_RELEASE, MOUSE_WHEEL_PRESS,
+    // Special:
+    RESIZE_EVENT,
 } btui_key_t;
 
 typedef enum {
@@ -427,7 +429,7 @@ btui_t *btui_create(btui_mode_t mode)
 
     struct sigaction sa_winch = {.sa_handler = &update_term_size};
     sigaction(SIGWINCH, &sa_winch, NULL);
-    int signals[] = {SIGTERM, SIGINT, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGSEGV, SIGTSTP};
+    int signals[] = {SIGTERM, SIGINT, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGSEGV, SIGTSTP, SIGPIPE};
     struct sigaction sa = {.sa_handler = &btui_cleanup_and_raise, .sa_flags = (int)(SA_NODEFER | SA_RESETHAND)};
     for (size_t i = 0; i < sizeof(signals)/sizeof(signals[0]); i++)
         sigaction(signals[i], &sa, NULL);
@@ -514,8 +516,12 @@ int btui_getkey(btui_t *bt, int timeout, int *mouse_x, int *mouse_y)
     int fd = fileno(bt->in);
     int numcode = 0, modifiers = 0;
     int c = nextchar(fd);
-    if (c == '\x1b')
+    if (c == '\x1b') {
         goto escape;
+    } else if (c == -1 && bt->size_changed) {
+        bt->size_changed = 0;
+        return RESIZE_EVENT;
+    }
 
     return c;
 
