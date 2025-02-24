@@ -181,6 +181,8 @@ class BTUI:
     def attributes(self, *attrs):
     @contextmanager
     def bg(self, r, g, b): # R,G,B values are [0.0, 1.0]
+    @contextmanager
+    def buffered(self):
     def clear(self, mode='screen'):
     def disable(self):
     @contextmanager

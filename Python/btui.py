@@ -131,6 +131,8 @@ class ClearType(enum.IntEnum):
     RIGHT  = 5
 
 class BTUI:
+    _autoflush = True
+
     @contextmanager
     def attributes(self, *attrs):
         self.set_attributes(*attrs)
@@ -148,7 +150,8 @@ class BTUI:
         if isinstance(clear_type, str):
             clear_type = ClearType[clear_type.upper()]
         libbtui.btui_clear(self._btui, clear_type)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def disable(self):
         libbtui.btui_disable(self._btui)
@@ -183,11 +186,20 @@ class BTUI:
     def fill_box(self, x, y, w, h):
         assert self._btui
         libbtui.btui_fill_box(self._btui, int(x), int(y), int(w), int(h))
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def flush(self):
         assert self._btui
         libbtui.btui_flush(self._btui)
+
+    @contextmanager
+    def buffered(self):
+        assert self._btui
+        self._autoflush = False
+        yield
+        self._autoflush = True
+        self.flush()
 
     def getkey(self, timeout=None):
         assert self._btui
@@ -210,29 +222,34 @@ class BTUI:
     def move(self, x, y):
         assert self._btui
         libbtui.btui_move_cursor(self._btui, int(x), int(y))
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def set_cursor(self, cursor_type=CursorType.DEFAULT):
         assert self._btui
         if isinstance(cursor_type, str):
             cursor_type = CursorType[cursor_type.upper()]
         libbtui.btui_set_cursor(self._btui, cursor_type)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def hide_cursor(self):
         assert self._btui
         libbtui.btui_hide_cursor(self._btui)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def show_cursor(self):
         assert self._btui
         libbtui.btui_show_cursor(self._btui)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def outline_box(self, x, y, w, h):
         assert self._btui
         libbtui.btui_draw_linebox(self._btui, int(x), int(y), int(w), int(h))
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def scroll(self, firstline, lastline=None, amount=None):
         assert self._btui
@@ -240,7 +257,8 @@ class BTUI:
             amount = firstline
             firstline, lastline = 0, self.height-1
         libbtui.btui_scroll(self._btui, firstline, lastline, amount)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
     def set_attributes(self, *attrs):
         assert self._btui
@@ -285,7 +303,8 @@ class BTUI:
     def write_bytes(self, b):
         assert self._btui
         libbtui.btui_puts(self._btui, b)
-        libbtui.btui_flush(self._btui)
+        if self._autoflush:
+            libbtui.btui_flush(self._btui)
 
 def delay(fn):
     @functools.wraps(fn)
