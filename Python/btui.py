@@ -2,12 +2,13 @@ import ctypes
 import enum
 import functools
 import time
+import os.path
 from contextlib import contextmanager
 
 __all__ = ['open', 'TextAttr', 'ClearType', 'CursorType', 'BTUIMode']
 
 # Load the shared library into c types.
-libbtui = ctypes.CDLL("./libbtui.so")
+libbtui = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "libbtui.so")
 
 class FILE(ctypes.Structure):
     pass
