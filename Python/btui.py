@@ -211,10 +211,12 @@ class BTUI:
                 ctypes.byref(mouse_x), ctypes.byref(mouse_y))
         buf = ctypes.create_string_buffer(64)
         libbtui.btui_keyname(key, buf)
+        key = buf.value.decode('utf8')
+        if key == "<none>": key = None
         if mouse_x.value == -1:
-            return buf.value.decode('utf8'), None, None
+            return key, None, None
         else:
-            return buf.value.decode('utf8'), mouse_x.value, mouse_y.value
+            return key, mouse_x.value, mouse_y.value
 
     @property
     def height(self):
